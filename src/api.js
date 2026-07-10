@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+const API_BASE = "https://api.autoflow.ivanit.work/api/v1";
 
 function getToken() {
   return localStorage.getItem("autoflow_token");
