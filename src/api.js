@@ -54,7 +54,7 @@ export const api = {
   },
 
   getConfigs: function(tenantId) {
-    return request("/tenants/" + tenantId + "/configs/");
+    return request("/tenants/" + tenantId + "/configs");
   },
 
   createConfig: function(tenantId, data) {
