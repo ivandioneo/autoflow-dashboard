@@ -8,11 +8,11 @@ async function request(path, options = {}) {
   const token = getToken();
   const headers = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: "Bearer " + token } : {}),
     ...options.headers,
   };
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const res = await fetch(API_BASE + path, { ...options, headers });
 
   if (res.status === 401) {
     localStorage.removeItem("autoflow_token");
@@ -22,7 +22,7 @@ async function request(path, options = {}) {
   }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Request failed" }));
+    const err = await res.json().catch(function() { return { detail: "Request failed" }; });
     throw new Error(err.detail || "Request failed");
   }
 
@@ -31,48 +31,48 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  register(name, email, password) {
+  register: function(name, email, password) {
     return request("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name: name, email: email, password: password }),
     });
   },
 
-  login(email, password) {
+  login: function(email, password) {
     return request("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: email, password: password }),
     });
   },
 
-  getMe() {
+  getMe: function() {
     return request("/auth/me");
   },
 
-  getTemplates() {
-    return request("/templates");
+  getTemplates: function() {
+    return request("/templates/");
   },
 
-  getConfigs(tenantId) {
-    return request(`/tenants/${tenantId}/configs`);
+  getConfigs: function(tenantId) {
+    return request("/tenants/" + tenantId + "/configs/");
   },
 
-  createConfig(tenantId, data) {
-    return request(`/tenants/${tenantId}/configs`, {
+  createConfig: function(tenantId, data) {
+    return request("/tenants/" + tenantId + "/configs", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  updateConfig(tenantId, configId, data) {
-    return request(`/tenants/${tenantId}/configs/${configId}`, {
+  updateConfig: function(tenantId, configId, data) {
+    return request("/tenants/" + tenantId + "/configs/" + configId, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
   },
 
-  updateTenant(tenantId, data) {
-    return request(`/tenants/${tenantId}`, {
+  updateTenant: function(tenantId, data) {
+    return request("/tenants/" + tenantId, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
