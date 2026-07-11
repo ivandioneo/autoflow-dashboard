@@ -27,7 +27,7 @@ export default function Login({ onAuth }) {
       } else {
         result = await api.login(email, password);
       }
-      onAuth(result.tenant, result.token);
+      onAuth(result.tenant, result.access_token);
     } catch (err) {
       setError(err.message);
     } finally {
