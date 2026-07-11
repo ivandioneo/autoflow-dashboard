@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import "./Admin.css";
 
-const PLANS = ["free", "starter", "pro"];
+// Must match the plan hierarchy used for feature gating in Templates.jsx.
+const PLANS = ["free", "basic", "pro"];
 
 // `details` arrives as a JSON object; rendering one directly into JSX throws.
 function formatDetails(details) {

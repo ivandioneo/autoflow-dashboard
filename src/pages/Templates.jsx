@@ -58,6 +58,11 @@ export default function Templates({ tenant, onLogout }) {
           <p className="subtitle">{tenant.name}</p>
         </div>
         <div className="header-actions">
+          {tenant.role === "admin" && (
+            <button className="secondary" onClick={() => navigate("/admin")}>
+              Admin
+            </button>
+          )}
           <button className="secondary" onClick={() => navigate("/settings")}>
             Settings
           </button>
