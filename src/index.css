@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,24 +7,53 @@
 }
 
 :root {
-  --bg: #f8f8f6;
+  /* Brand palette — matched to the AutoFlow landing page */
+  --navy: #0F172A;
+  --navy-2: #1E293B;
+  --teal: #0D9488;
+  --teal-light: #14B8A6;
+  --amber: #F59E0B;
+  --amber-2: #F97316;
+
+  /* Surfaces */
+  --bg: #F0F4F8;
   --surface: #ffffff;
-  --text: #1a1a1a;
-  --text-secondary: #6b6b6b;
-  --text-muted: #999999;
-  --accent: #2563eb;
-  --accent-bg: #eff4ff;
-  --accent-text: #1d4ed8;
-  --border: #e5e5e3;
-  --success: #16a34a;
-  --success-bg: #ecfdf5;
-  --success-text: #15803d;
-  --pro-bg: #f3e8ff;
-  --pro-text: #7c3aed;
-  --danger: #dc2626;
-  --danger-bg: #fef2f2;
-  --radius: 8px;
-  --radius-lg: 12px;
+  --surface-2: #F8FAFC;
+
+  /* Text */
+  --text: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+
+  /* Accent = teal (was generic blue) */
+  --accent: #0D9488;
+  --accent-hover: #0B7E73;
+  --accent-bg: #E6F4F2;
+  --accent-text: #0B7E73;
+
+  /* Borders */
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Status */
+  --success: #16A34A;
+  --success-bg: #E7F6ED;
+  --success-text: #16794C;
+  --pro-bg: #FDF0E3;
+  --pro-text: #B45309;
+  --danger: #DC2626;
+  --danger-bg: #FEF2F2;
+
+  /* Shape & depth */
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.04);
+  --shadow: 0 4px 16px rgba(15,23,42,0.06);
+  --shadow-lg: 0 12px 40px rgba(15,23,42,0.10);
+  --gradient: linear-gradient(135deg, #0D9488, #14B8A6);
+  --gradient-warm: linear-gradient(135deg, #F59E0B, #F97316);
+
   --font: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -43,18 +74,19 @@ input[type="text"],
 input[type="email"],
 input[type="password"] {
   width: 100%;
-  padding: 8px 12px;
+  padding: 11px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: 14px;
   background: var(--surface);
   color: var(--text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 input:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
 }
 
 button {
@@ -62,28 +94,60 @@ button {
   border: none;
   border-radius: var(--radius);
   font-size: 14px;
-  font-weight: 500;
-  padding: 8px 16px;
-  transition: opacity 0.15s;
+  font-weight: 600;
+  padding: 10px 18px;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, opacity 0.15s;
 }
 
-button:hover {
-  opacity: 0.85;
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--teal-light);
+  outline-offset: 2px;
 }
 
 button.primary {
-  background: var(--accent);
+  background: var(--gradient);
   color: white;
+  box-shadow: 0 4px 14px rgba(13,148,136,0.25);
+}
+
+button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13,148,136,0.32);
+}
+
+button.primary:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 button.secondary {
-  background: transparent;
+  background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+button.secondary:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
 }
 
 button.ghost {
   background: transparent;
   color: var(--accent-text);
-  padding: 4px 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+}
+
+button.ghost:hover {
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

@@ -37,66 +37,97 @@ export default function Login({ onAuth }) {
 
   return (
     <div className="login-page">
-      <div className="login-card">
-        <div className="login-header">
-          <h1>AutoFlow</h1>
-          <p>{isRegister ? "Create your account" : "Sign in to your dashboard"}</p>
+      {/* Brand panel — collapses to a slim header on mobile */}
+      <div className="login-brand">
+        <div className="login-brand-orb login-brand-orb-1" />
+        <div className="login-brand-orb login-brand-orb-2" />
+        <div className="login-brand-inner">
+          <div className="login-logo">
+            <div className="login-logo-mark">A</div>
+            <span className="login-logo-word">AutoFlow</span>
+          </div>
+          <h2 className="login-brand-headline">
+            Your business on <span className="login-accent">autopilot.</span>
+          </h2>
+          <p className="login-brand-sub">
+            Reminders, follow-ups, and confirmations that run on their own — so
+            you can focus on the work that matters.
+          </p>
+          <div className="login-brand-points">
+            <span>✦ Automated appointment reminders</span>
+            <span>✦ Every account fully isolated</span>
+            <span>✦ Built for UAE businesses</span>
+          </div>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {isRegister && (
+      {/* Form panel */}
+      <div className="login-form-panel">
+        <div className="login-card">
+          <div className="login-header">
+            <h1>{isRegister ? "Create your account" : "Welcome back"}</h1>
+            <p>
+              {isRegister
+                ? "Set up your AutoFlow dashboard"
+                : "Sign in to your dashboard"}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="login-form">
+            {isRegister && (
+              <div className="field">
+                <label>Business name</label>
+                <input
+                  type="text"
+                  placeholder="Glow Salon"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
+
             <div className="field">
-              <label>Business name</label>
+              <label>Email</label>
               <input
-                type="text"
-                placeholder="Glow Salon"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                type="email"
+                placeholder="you@yourbusiness.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-          )}
 
-          <div className="field">
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="you@yourbusiness.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+            <div className="field">
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
 
-          <div className="field">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
+            {error && <div className="error-msg">{error}</div>}
 
-          {error && <div className="error-msg">{error}</div>}
+            <button type="submit" className="primary login-btn" disabled={loading}>
+              {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
+            </button>
+          </form>
 
-          <button type="submit" className="primary login-btn" disabled={loading}>
-            {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
-          </button>
-        </form>
-
-        <p className="toggle-auth">
-          {isRegister ? "Already have an account?" : "No account?"}{" "}
-          <span
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError("");
-            }}
-          >
-            {isRegister ? "Sign in" : "Create one"}
-          </span>
-        </p>
+          <p className="toggle-auth">
+            {isRegister ? "Already have an account?" : "No account?"}{" "}
+            <span
+              onClick={() => {
+                setIsRegister(!isRegister);
+                setError("");
+              }}
+            >
+              {isRegister ? "Sign in" : "Create one"}
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
