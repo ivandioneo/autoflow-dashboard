@@ -86,7 +86,15 @@ async function request(path, options = {}, isRetry = false) {
   if (res.status === 403) throw new Error("You don't have access to this.");
   if (!res.ok) {
     const err = await res.json().catch(function () { return { detail: "Request failed" }; });
-    throw new Error(err.detail || "Request failed");
+    const detail = err.detail;
+    const message = Array.isArray(detail)
+      ? detail.map(function (item) {
+          return item.msg || JSON.stringify(item);
+        }).join("; ")
+      : typeof detail === "string"
+        ? detail
+        : "Request failed";
+    throw new Error(message);
   }
   if (res.status === 204) return null;
   return res.json();
@@ -113,5 +121,5 @@ export const api = {
   getAdminTenant: function (tenantId) { return request("/admin/tenants/" + tenantId); },
   getAdminActivity: function () { return request("/admin/activity"); },
   getAdminAudit: function () { return request("/admin/audit"); },
-  updateTenantPlan: function (tenantId, plan) { return request("/admin/tenants/" + tenantId + "/plan", { method: "PATCH", body: JSON.stringify({ plan: plan }) }); },
+  updateTenantPlan: function (tenantId, plan) { return request("/admin/tenants/" + tenantId + "/plan?plan=" + encodeURIComponent(plan), { method: "PATCH" }); },
 };
