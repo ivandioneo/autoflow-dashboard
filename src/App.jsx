@@ -22,23 +22,17 @@ export default function App() {
     let active = true;
 
     async function restoreSession() {
-      const token = localStorage.getItem("autoflow_token");
-      if (!token) {
-        localStorage.removeItem("autoflow_tenant");
-        if (active) setReady(true);
-        return;
-      }
-
       try {
+        const token = await api.restoreSession();
+        if (!token) return;
+
         const current = await api.getMe();
         const currentTenant = current && (current.tenant || current);
         if (!currentTenant || !currentTenant.id) {
           throw new Error("Invalid session profile");
         }
-        localStorage.setItem("autoflow_tenant", JSON.stringify(currentTenant));
         if (active) setTenant(currentTenant);
       } catch {
-        localStorage.removeItem("autoflow_tenant");
         if (active) setTenant(null);
       } finally {
         if (active) setReady(true);
@@ -52,7 +46,6 @@ export default function App() {
   }, []);
 
   function handleAuth(tenantData) {
-    localStorage.setItem("autoflow_tenant", JSON.stringify(tenantData));
     setTenant(tenantData);
   }
 
@@ -63,7 +56,6 @@ export default function App() {
   }
 
   function handleTenantUpdate(updated) {
-    localStorage.setItem("autoflow_tenant", JSON.stringify(updated));
     setTenant(updated);
   }
 

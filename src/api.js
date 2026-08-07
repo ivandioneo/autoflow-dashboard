@@ -2,42 +2,32 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   "https://api.autoflow.ivanit.work/api/v1";
 
-const ACCESS_KEY = "autoflow_token";
-const REFRESH_KEY = "autoflow_refresh";
+let accessToken = null;
+let refreshInFlight = null;
 
 function getToken() {
-  return localStorage.getItem(ACCESS_KEY);
-}
-
-function getRefreshToken() {
-  return localStorage.getItem(REFRESH_KEY);
+  return accessToken;
 }
 
 function clearSession() {
-  localStorage.removeItem(ACCESS_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  accessToken = null;
+  localStorage.removeItem("autoflow_token");
+  localStorage.removeItem("autoflow_refresh");
   localStorage.removeItem("autoflow_tenant");
 }
 
-function saveTokens(data) {
+function saveAccessToken(data) {
   if (!data) return data;
   const access = data.access_token || data.token;
-  const refresh = data.refresh_token;
-  if (access) localStorage.setItem(ACCESS_KEY, access);
-  if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  if (access) accessToken = access;
   return data;
 }
 
-let refreshInFlight = null;
-
 function refreshAccessToken() {
   if (refreshInFlight) return refreshInFlight;
-  const refresh = getRefreshToken();
-  if (!refresh) return Promise.resolve(null);
   refreshInFlight = fetch(API_BASE + "/auth/refresh", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refresh }),
+    credentials: "include",
   })
     .then(function (res) {
       if (!res.ok) return null;
@@ -45,7 +35,7 @@ function refreshAccessToken() {
     })
     .then(function (data) {
       if (!data) return null;
-      saveTokens(data);
+      saveAccessToken(data);
       return data.access_token || data.token || null;
     })
     .catch(function () {
@@ -67,11 +57,13 @@ function buildHeaders(options) {
 }
 
 async function request(path, options = {}, isRetry = false) {
+  const { skipAuth = false, ...fetchOptions } = options;
   const res = await fetch(API_BASE + path, {
-    ...options,
-    headers: buildHeaders(options),
+    ...fetchOptions,
+    credentials: "include",
+    headers: buildHeaders(fetchOptions),
   });
-  if (res.status === 401 && !isRetry) {
+  if (res.status === 401 && !skipAuth && !isRetry) {
     const newToken = await refreshAccessToken();
     if (newToken) return request(path, options, true);
     clearSession();
@@ -79,9 +71,13 @@ async function request(path, options = {}, isRetry = false) {
     return;
   }
   if (res.status === 401) {
-    clearSession();
-    window.location.href = "/login";
-    return;
+    if (!skipAuth) {
+      clearSession();
+      window.location.href = "/login";
+      return;
+    }
+    const err = await res.json().catch(function () { return { detail: "Request failed" }; });
+    throw new Error(typeof err.detail === "string" ? err.detail : "Request failed");
   }
   if (res.status === 403) throw new Error("You don't have access to this.");
   if (!res.ok) {
@@ -102,10 +98,24 @@ async function request(path, options = {}, isRetry = false) {
 
 export const api = {
   register: function (name, email, password) {
-    return request("/auth/register", { method: "POST", body: JSON.stringify({ name: name, email: email, password: password }) }).then(saveTokens);
+    return request("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name: name, email: email, password: password }),
+      skipAuth: true,
+    }).then(saveAccessToken);
   },
   login: function (email, password) {
-    return request("/auth/login", { method: "POST", body: JSON.stringify({ email: email, password: password }) }).then(saveTokens);
+    return request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: email, password: password }),
+      skipAuth: true,
+    }).then(saveAccessToken);
+  },
+  restoreSession: function () {
+    return refreshAccessToken().then(function (token) {
+      if (!token) clearSession();
+      return token;
+    });
   },
   logout: function () {
     return request("/auth/logout", { method: "POST" }).catch(function () { return null; }).finally(clearSession);
