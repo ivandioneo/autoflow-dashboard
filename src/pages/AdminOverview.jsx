@@ -176,7 +176,7 @@ export default function AdminOverview({ tenant, onLogout }) {
                   <tr
                     key={t.id}
                     className="admin-row"
-                    onClick={() => navigate("/admin/tenants/" + t.id)}
+                    onClick={() => navigate("/admin/tenants/" + encodeURIComponent(t.id))}
                   >
                     <td>
                       <span className="admin-name">{t.name}</span>

@@ -81,7 +81,7 @@ export default function Templates({ tenant, onLogout }) {
             <div
               key={tpl.id}
               className={`template-card ${config?.enabled ? "active" : ""} ${!accessible ? "locked" : ""}`}
-              onClick={() => accessible && navigate(`/config/${tpl.slug}`)}
+              onClick={() => accessible && navigate(`/config/${encodeURIComponent(tpl.slug)}`)}
             >
               <div className="card-top">
                 <span className="card-icon">
