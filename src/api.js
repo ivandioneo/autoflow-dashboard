@@ -112,7 +112,10 @@ export const api = {
     }).then(saveAccessToken);
   },
   restoreSession: function () {
-    return refreshAccessToken();
+    return refreshAccessToken().then(function (token) {
+      if (!token) clearSession();
+      return token;
+    });
   },
   logout: function () {
     return request("/auth/logout", { method: "POST" }).catch(function () { return null; }).finally(clearSession);
