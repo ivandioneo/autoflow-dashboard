@@ -10,29 +10,128 @@ export default function Login({ onAuth }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Set when registration succeeds — holds the submitted email/password
+  // so the resend-verification flow can re-use them without asking again.
+  const [verificationPending, setVerificationPending] = useState(null);
+  const [resendStatus, setResendStatus] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      let result;
       if (isRegister) {
         if (!name.trim()) {
           setError("Business name is required");
           setLoading(false);
           return;
         }
-        result = await api.register(name, email, password);
-      } else {
-        result = await api.login(email, password);
+        // Registration returns {message, status} — no tenant/token.
+        await api.register(name, email, password);
+        // Show the verification-pending notice; do NOT call onAuth().
+        setVerificationPending({ email, password });
+        return;
       }
+
+      const result = await api.login(email, password);
       onAuth(result.tenant);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleResend() {
+    if (!verificationPending) return;
+    setResendStatus("");
+    setResendLoading(true);
+    try {
+      const result = await api.resendVerification(
+        verificationPending.email,
+        verificationPending.password
+      );
+      setResendStatus(result.message || "Verification email sent.");
+    } catch (err) {
+      setResendStatus(err.message || "Could not resend. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  // Verification-pending screen shown after successful registration.
+  if (verificationPending) {
+    return (
+      <div className="login-page">
+        <div className="login-brand">
+          <div className="login-brand-orb login-brand-orb-1" />
+          <div className="login-brand-orb login-brand-orb-2" />
+          <div className="login-brand-inner">
+            <div className="login-logo">
+              <div className="login-logo-mark">A</div>
+              <span className="login-logo-word">AutoFlow</span>
+            </div>
+            <h2 className="login-brand-headline">
+              Your business on <span className="login-accent">autopilot.</span>
+            </h2>
+            <p className="login-brand-sub">
+              Reminders, follow-ups, and confirmations that run on their own — so
+              you can focus on the work that matters.
+            </p>
+            <div className="login-brand-points">
+              <span>✦ Automated appointment reminders</span>
+              <span>✦ Every account fully isolated</span>
+              <span>✦ Built for UAE businesses</span>
+            </div>
+          </div>
+        </div>
+        <div className="login-form-panel">
+          <div className="login-card">
+            <div className="login-header">
+              <h1>Check your email</h1>
+              <p>One step left before you can sign in.</p>
+            </div>
+            <div className="verify-notice">
+              <p>
+                We sent a verification link to{" "}
+                <strong>{verificationPending.email}</strong>. Click the link in
+                that email to activate your account, then come back here to sign
+                in.
+              </p>
+              <p className="verify-notice-sub">
+                Didn’t receive it? Check your spam folder or resend below.
+              </p>
+            </div>
+            {resendStatus && (
+              <div className="info-msg">{resendStatus}</div>
+            )}
+            <button
+              className="primary login-btn"
+              onClick={handleResend}
+              disabled={resendLoading}
+            >
+              {resendLoading ? "Sending..." : "Resend verification email"}
+            </button>
+            <p className="toggle-auth">
+              Already verified?{" "}
+              <span
+                onClick={() => {
+                  setVerificationPending(null);
+                  setIsRegister(false);
+                  setResendStatus("");
+                  setEmail(verificationPending.email);
+                  setPassword("");
+                }}
+              >
+                Sign in
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
