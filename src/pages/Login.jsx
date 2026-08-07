@@ -9,6 +9,7 @@ export default function Login({ onAuth }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verifyPending, setVerifyPending] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,7 +24,9 @@ export default function Login({ onAuth }) {
           setLoading(false);
           return;
         }
-        result = await api.register(name, email, password);
+        await api.register(name, email, password);
+        setVerifyPending(true);
+        return;
       } else {
         result = await api.login(email, password);
       }
@@ -62,40 +65,63 @@ export default function Login({ onAuth }) {
       </div>
       <div className="login-form-panel">
         <div className="login-card">
-          <div className="login-header">
-            <h1>{isRegister ? "Create your account" : "Welcome back"}</h1>
-            <p>
-              {isRegister
-                ? "Set up your AutoFlow dashboard"
-                : "Sign in to your dashboard"}
-            </p>
-          </div>
-          <form onSubmit={handleSubmit} className="login-form">
-            {isRegister && (
-              <div className="field">
-                <label>Business name</label>
-                <input type="text" placeholder="Glow Salon" value={name} onChange={(e) => setName(e.target.value)} />
+          {verifyPending ? (
+            <div className="verify-pending">
+              <div className="verify-pending-icon">✉</div>
+              <h2>Check your inbox</h2>
+              <p>
+                We sent a verification link to <strong>{email}</strong>.<br />
+                Verify your email before signing in.
+              </p>
+              <button
+                className="primary login-btn"
+                onClick={() => {
+                  setVerifyPending(false);
+                  setIsRegister(false);
+                  setPassword("");
+                }}
+              >
+                Back to sign in
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="login-header">
+                <h1>{isRegister ? "Create your account" : "Welcome back"}</h1>
+                <p>
+                  {isRegister
+                    ? "Set up your AutoFlow dashboard"
+                    : "Sign in to your dashboard"}
+                </p>
               </div>
-            )}
-            <div className="field">
-              <label>Email</label>
-              <input type="email" placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="field">
-              <label>Password</label>
-              <input type="password" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-            </div>
-            {error && <div className="error-msg">{error}</div>}
-            <button type="submit" className="primary login-btn" disabled={loading}>
-              {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
-            </button>
-          </form>
-          <p className="toggle-auth">
-            {isRegister ? "Already have an account?" : "No account?"}{" "}
-            <span onClick={() => { setIsRegister(!isRegister); setError(""); }}>
-              {isRegister ? "Sign in" : "Create one"}
-            </span>
-          </p>
+              <form onSubmit={handleSubmit} className="login-form">
+                {isRegister && (
+                  <div className="field">
+                    <label>Business name</label>
+                    <input type="text" placeholder="Glow Salon" value={name} onChange={(e) => setName(e.target.value)} />
+                  </div>
+                )}
+                <div className="field">
+                  <label>Email</label>
+                  <input type="email" placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <div className="field">
+                  <label>Password</label>
+                  <input type="password" placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+                </div>
+                {error && <div className="error-msg">{error}</div>}
+                <button type="submit" className="primary login-btn" disabled={loading}>
+                  {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
+                </button>
+              </form>
+              <p className="toggle-auth">
+                {isRegister ? "Already have an account?" : "No account?"}{" "}
+                <span onClick={() => { setIsRegister(!isRegister); setError(""); }}>
+                  {isRegister ? "Sign in" : "Create one"}
+                </span>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

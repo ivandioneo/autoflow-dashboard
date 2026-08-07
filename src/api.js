@@ -79,7 +79,10 @@ async function request(path, options = {}, isRetry = false) {
     const err = await res.json().catch(function () { return { detail: "Request failed" }; });
     throw new Error(typeof err.detail === "string" ? err.detail : "Request failed");
   }
-  if (res.status === 403) throw new Error("You don't have access to this.");
+  if (res.status === 403) {
+    const err = await res.json().catch(function () { return { detail: "You don't have access to this." }; });
+    throw new Error(typeof err.detail === "string" ? err.detail : "You don't have access to this.");
+  }
   if (!res.ok) {
     const err = await res.json().catch(function () { return { detail: "Request failed" }; });
     const detail = err.detail;
@@ -97,12 +100,14 @@ async function request(path, options = {}, isRetry = false) {
 }
 
 export const api = {
+  // Registration returns HTTP 202 {message} — no access token.
+  // Do NOT call saveAccessToken here.
   register: function (name, email, password) {
     return request("/auth/register", {
       method: "POST",
       body: JSON.stringify({ name: name, email: email, password: password }),
       skipAuth: true,
-    }).then(saveAccessToken);
+    });
   },
   login: function (email, password) {
     return request("/auth/login", {
@@ -121,6 +126,13 @@ export const api = {
     return request("/auth/logout", { method: "POST" }).catch(function () { return null; }).finally(clearSession);
   },
   getMe: function () { return request("/auth/me"); },
+  resendVerification: function (email, password) {
+    return request("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email: email, password: password }),
+      skipAuth: true,
+    });
+  },
   getTemplates: function () { return request("/templates/"); },
   getConfigs: function (tenantId) { return request("/tenants/" + tenantId + "/configs"); },
   createConfig: function (tenantId, data) { return request("/tenants/" + tenantId + "/configs", { method: "POST", body: JSON.stringify(data) }); },
