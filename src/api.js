@@ -100,8 +100,6 @@ async function request(path, options = {}, isRetry = false) {
 }
 
 export const api = {
-  // Registration returns HTTP 202 {message} — no access token.
-  // Do NOT call saveAccessToken here.
   register: function (name, email, password) {
     return request("/auth/register", {
       method: "POST",
@@ -133,6 +131,13 @@ export const api = {
       skipAuth: true,
     });
   },
+  resetPassword: function (token, newPassword) {
+    return request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token: token, new_password: newPassword }),
+      skipAuth: true,
+    });
+  },
   getTemplates: function () { return request("/templates/"); },
   getConfigs: function (tenantId) { return request("/tenants/" + tenantId + "/configs"); },
   createConfig: function (tenantId, data) { return request("/tenants/" + tenantId + "/configs", { method: "POST", body: JSON.stringify(data) }); },
@@ -144,4 +149,5 @@ export const api = {
   getAdminActivity: function () { return request("/admin/activity"); },
   getAdminAudit: function () { return request("/admin/audit"); },
   updateTenantPlan: function (tenantId, plan) { return request("/admin/tenants/" + tenantId + "/plan?plan=" + encodeURIComponent(plan), { method: "PATCH" }); },
+  adminResetPassword: function (tenantId) { return request("/admin/tenants/" + tenantId + "/reset-password", { method: "POST" }); },
 };

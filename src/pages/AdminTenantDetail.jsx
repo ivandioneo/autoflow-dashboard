@@ -3,10 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import "./Admin.css";
 
-// Must match the plan hierarchy used for feature gating in Templates.jsx.
 const PLANS = ["free", "basic", "pro"];
 
-// `details` arrives as a JSON object; rendering one directly into JSX throws.
 function formatDetails(details) {
   if (!details) return "";
   if (typeof details === "string") return details;
@@ -26,6 +24,7 @@ export default function AdminTenantDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -65,6 +64,24 @@ export default function AdminTenantDetail() {
       });
   }
 
+  function sendPasswordReset() {
+    if (!window.confirm("Send a password reset email to " + (data && data.email) + "? Their current sessions will be revoked.")) return;
+    setResetting(true);
+    setNotice("");
+    setError("");
+    api
+      .adminResetPassword(id)
+      .then(function (res) {
+        setNotice(res.message || "Password reset email sent.");
+      })
+      .catch(function (err) {
+        setError(err.message);
+      })
+      .finally(function () {
+        setResetting(false);
+      });
+  }
+
   if (loading) {
     return (
       <div className="admin-shell">
@@ -87,7 +104,7 @@ export default function AdminTenantDetail() {
   }
 
   const configs = data.configs || [];
-  const activity = data.activity || [];
+  const activity = data.recent_activity || [];
 
   return (
     <div className="admin-shell">
@@ -154,9 +171,23 @@ export default function AdminTenantDetail() {
           })}
         </div>
         <p className="admin-muted admin-hint">
-          Changing a plan takes effect immediately and is written to the audit
-          log.
+          Changing a plan takes effect immediately and is written to the audit log.
         </p>
+      </section>
+
+      <section className="admin-panel">
+        <h2 className="admin-panel-title">Security</h2>
+        <p className="admin-muted admin-hint" style={{ marginBottom: "12px" }}>
+          Sending a reset email revokes all active sessions for this tenant and emails them a
+          one-time link valid for 1 hour. The admin never sees or sets the password.
+        </p>
+        <button
+          className="admin-btn admin-btn-danger"
+          disabled={resetting}
+          onClick={sendPasswordReset}
+        >
+          {resetting ? "Sending…" : "Send password reset email"}
+        </button>
       </section>
 
       <section className="admin-panel">
@@ -214,7 +245,7 @@ export default function AdminTenantDetail() {
                     )}
                   </span>
                   <span className="admin-muted admin-feed-time">
-                    {new Date(item.timestamp).toLocaleString()}
+                    {new Date(item.created_at).toLocaleString()}
                   </span>
                 </li>
               );

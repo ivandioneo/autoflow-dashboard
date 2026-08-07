@@ -8,6 +8,7 @@ import Settings from "./pages/Settings";
 import AdminOverview from "./pages/AdminOverview";
 import AdminTenantDetail from "./pages/AdminTenantDetail";
 import AdminRoute from "./components/AdminRoute";
+import ResetPassword from "./pages/ResetPassword";
 
 function ProtectedRoute({ tenant, children }) {
   if (!tenant) return <Navigate to="/login" replace />;
@@ -65,6 +66,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={tenant ? <Navigate to="/" replace /> : <Login onAuth={handleAuth} />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute tenant={tenant}><Templates tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/config/:slug" element={<ProtectedRoute tenant={tenant}><Config tenant={tenant} /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute tenant={tenant}><Settings tenant={tenant} onLogout={handleLogout} onUpdate={handleTenantUpdate} /></ProtectedRoute>} />
