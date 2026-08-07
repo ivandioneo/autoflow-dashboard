@@ -17,25 +17,58 @@ function ProtectedRoute({ tenant, children }) {
 export default function App() {
   const [tenant, setTenant] = useState(null);
   const [ready, setReady] = useState(false);
+
   useEffect(() => {
-    const saved = localStorage.getItem("autoflow_tenant");
-    if (saved) {
-      try { setTenant(JSON.parse(saved)); } catch { localStorage.removeItem("autoflow_tenant"); }
+    let active = true;
+
+    async function restoreSession() {
+      const token = localStorage.getItem("autoflow_token");
+      if (!token) {
+        localStorage.removeItem("autoflow_tenant");
+        if (active) setReady(true);
+        return;
+      }
+
+      try {
+        const current = await api.getMe();
+        const currentTenant = current && (current.tenant || current);
+        if (!currentTenant || !currentTenant.id) {
+          throw new Error("Invalid session profile");
+        }
+        localStorage.setItem("autoflow_tenant", JSON.stringify(currentTenant));
+        if (active) setTenant(currentTenant);
+      } catch {
+        localStorage.removeItem("autoflow_tenant");
+        if (active) setTenant(null);
+      } finally {
+        if (active) setReady(true);
+      }
     }
-    setReady(true);
+
+    restoreSession();
+    return () => {
+      active = false;
+    };
   }, []);
+
   function handleAuth(tenantData) {
     localStorage.setItem("autoflow_tenant", JSON.stringify(tenantData));
     setTenant(tenantData);
   }
+
   function handleLogout() {
-    api.logout().finally(function () { setTenant(null); });
+    api.logout().finally(function () {
+      setTenant(null);
+    });
   }
+
   function handleTenantUpdate(updated) {
     localStorage.setItem("autoflow_tenant", JSON.stringify(updated));
     setTenant(updated);
   }
+
   if (!ready) return null;
+
   return (
     <BrowserRouter>
       <Routes>
