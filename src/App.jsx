@@ -1,1 +1,81 @@
-aW1wb3J0IHsgQnJvd3NlclJvdXRlciwgUm91dGVzLCBSb3V0ZSwgTmF2aWdhdGUgfSBmcm9tICJyZWFjdC1yb3V0ZXItZG9tIjsKaW1wb3J0IHsgdXNlU3RhdGUsIHVzZUVmZmVjdCB9IGZyb20gInJlYWN0IjsKaW1wb3J0IHsgYXBpIH0gZnJvbSAiLi9hcGkiOwppbXBvcnQgTG9naW4gZnJvbSAiLi9wYWdlcy9Mb2dpbiI7CmltcG9ydCBGb3Jnb3RQYXNzd29yZCBmcm9tICIuL3BhZ2VzL0ZvcmdvdFBhc3N3b3JkIjsKaW1wb3J0IFJlc2V0UGFzc3dvcmQgZnJvbSAiLi9wYWdlcy9SZXNldFBhc3N3b3JkIjsKaW1wb3J0IFRlbXBsYXRlcyBmcm9tICIuL3BhZ2VzL1RlbXBsYXRlcyI7CmltcG9ydCBDb25maWcgZnJvbSAiLi9wYWdlcy9Db25maWciOwppbXBvcnQgU2V0dGluZ3MgZnJvbSAiLi9wYWdlcy9TZXR0aW5ncyI7CmltcG9ydCBBZG1pbk92ZXJ2aWV3IGZyb20gIi4vcGFnZXMvQWRtaW5PdmVydmlldyI7CmltcG9ydCBBZG1pblRlbmFudERldGFpbCBmcm9tICIuL3BhZ2VzL0FkbWluVGVuYW50RGV0YWlsIjsKaW1wb3J0IEFkbWluUm91dGUgZnJvbSAiLi9jb21wb25lbnRzL0FkbWluUm91dGUiOwoKZnVuY3Rpb24gUHJvdGVjdGVkUm91dGUoeyB0ZW5hbnQsIGNoaWxkcmVuIH0pIHsKICBpZiAoIXRlbmFudCkgcmV0dXJuIDxOYXZpZ2F0ZSB0bz0iL2xvZ2luIiByZXBsYWNlIC8+OwogIHJldHVybiBjaGlsZHJlbjsKfQoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQXBwKCkgewogIGNvbnN0IFt0ZW5hbnQsIHNldFRlbmFudF0gPSB1c2VTdGF0ZShudWxsKTsKICBjb25zdCBbcmVhZHksIHNldFJlYWR5XSA9IHVzZVN0YXRlKGZhbHNlKTsKCiAgdXNlRWZmZWN0KCgpID0+IHsKICAgIGxldCBhY3RpdmUgPSB0cnVlOwoKICAgIGFzeW5jIGZ1bmN0aW9uIHJlc3RvcmVTZXNzaW9uKCkgewogICAgICB0cnkgewogICAgICAgIGNvbnN0IHRva2VuID0gYXdhaXQgYXBpLnJlc3RvcmVTZXNzaW9uKCk7CiAgICAgICAgaWYgKCF0b2tlbikgcmV0dXJuOwoKICAgICAgICBjb25zdCBjdXJyZW50ID0gYXdhaXQgYXBpLmdldE1lKCk7CiAgICAgICAgY29uc3QgY3VycmVudFRlbmFudCA9IGN1cnJlbnQgJiYgKGN1cnJlbnQudGVuYW50IHx8IGN1cnJlbnQpOwogICAgICAgIGlmICghY3VycmVudFRlbmFudCB8fCAhY3VycmVudFRlbmFudC5pZCkgewogICAgICAgICAgdGhyb3cgbmV3IEVycm9yKCJJbnZhbGlkIHNlc3Npb24gcHJvZmlsZSIpOwogICAgICAgIH0KICAgICAgICBpZiAoYWN0aXZlKSBzZXRUZW5hbnQoY3VycmVudFRlbmFudCk7CiAgICAgIH0gY2F0Y2ggewogICAgICAgIGlmIChhY3RpdmUpIHNldFRlbmFudChudWxsKTsKICAgICAgfSBmaW5hbGx5IHsKICAgICAgICBpZiAoYWN0aXZlKSBzZXRSZWFkeSh0cnVlKTsKICAgICAgfQogICAgfQoKICAgIHJlc3RvcmVTZXNzaW9uKCk7CiAgICByZXR1cm4gKCkgPT4gewogICAgICBhY3RpdmUgPSBmYWxzZTsKICAgIH07CiAgfSwgW10pOwoKICBmdW5jdGlvbiBoYW5kbGVBdXRoKHRlbmFudERhdGEpIHsKICAgIHNldFRlbmFudCh0ZW5hbnREYXRhKTsKICB9CgogIGZ1bmN0aW9uIGhhbmRsZUxvZ291dCgpIHsKICAgIGFwaS5sb2dvdXQoKS5maW5hbGx5KGZ1bmN0aW9uICgpIHsKICAgICAgc2V0VGVuYW50KG51bGwpOwogICAgfSk7CiAgfQoKICBmdW5jdGlvbiBoYW5kbGVUZW5hbnRVcGRhdGUodXBkYXRlZCkgewogICAgc2V0VGVuYW50KHVwZGF0ZWQpOwogIH0KCiAgaWYgKCFyZWFkeSkgcmV0dXJuIG51bGw7CgogIHJldHVybiAoCiAgICA8QnJvd3NlclJvdXRlcj4KICAgICAgPFJvdXRlcz4KICAgICAgICA8Um91dGUgcGF0aD0iL2xvZ2luIiBlbGVtZW50PXt0ZW5hbnQgPyA8TmF2aWdhdGUgdG89Ii8iIHJlcGxhY2UgLz4gOiA8TG9naW4gb25BdXRoPXtoYW5kbGVBdXRofSAvPn0gLz4KICAgICAgICA8Um91dGUgcGF0aD0iL2ZvcmdvdC1wYXNzd29yZCIgZWxlbWVudD17dGVuYW50ID8gPE5hdmlnYXRlIHRvPSIvIiByZXBsYWNlIC8+IDogPEZvcmdvdFBhc3N3b3JkIC8+fSAvPgogICAgICAgIDxSb3V0ZSBwYXRoPSIvcmVzZXQtcGFzc3dvcmQiIGVsZW1lbnQ9ezxSZXNldFBhc3N3b3JkIC8+fSAvPgogICAgICAgIDxSb3V0ZSBwYXRoPSIvIiBlbGVtZW50PXs8UHJvdGVjdGVkUm91dGUgdGVuYW50PXt0ZW5hbnR9PjxUZW1wbGF0ZXMgdGVuYW50PXt0ZW5hbnR9IG9uTG9nb3V0PXtoYW5kbGVMb2dvdXR9IC8+PC9Qcm90ZWN0ZWRSb3V0ZT59IC8+CiAgICAgICAgPFJvdXRlIHBhdGg9Ii9jb25maWcvOnNsdWciIGVsZW1lbnQ9ezxQcm90ZWN0ZWRSb3V0ZSB0ZW5hbnQ9e3RlbmFudH0+PENvbmZpZyB0ZW5hbnQ9e3RlbmFudH0gLz48L1Byb3RlY3RlZFJvdXRlPn0gLz4KICAgICAgICA8Um91dGUgcGF0aD0iL3NldHRpbmdzIiBlbGVtZW50PXs8UHJvdGVjdGVkUm91dGUgdGVuYW50PXt0ZW5hbnR9PjxTZXR0aW5ncyB0ZW5hbnQ9e3RlbmFudH0gb25Mb2dvdXQ9e2hhbmRsZUxvZ291dH0gb25VcGRhdGU9e2hhbmRsZVRlbmFudFVwZGF0ZX0gLz48L1Byb3RlY3RlZFJvdXRlPn0gLz4KICAgICAgICA8Um91dGUgcGF0aD0iL2FkbWluIiBlbGVtZW50PXs8QWRtaW5Sb3V0ZSB0ZW5hbnQ9e3RlbmFudH0+PEFkbWluT3ZlcnZpZXcgdGVuYW50PXt0ZW5hbnR9IG9uTG9nb3V0PXtoYW5kbGVMb2dvdXR9IC8+PC9BZG1pblJvdXRlPn0gLz4KICAgICAgICA8Um91dGUgcGF0aD0iL2FkbWluL3RlbmFudHMvOmlkIiBlbGVtZW50PXs8QWRtaW5Sb3V0ZSB0ZW5hbnQ9e3RlbmFudH0+PEFkbWluVGVuYW50RGV0YWlsIC8+PC9BZG1pblJvdXRlPn0gLz4KICAgICAgICA8Um91dGUgcGF0aD0iKiIgZWxlbWVudD17PE5hdmlnYXRlIHRvPSIvIiByZXBsYWNlIC8+fSAvPgogICAgICA8L1JvdXRlcz4KICAgIDwvQnJvd3NlclJvdXRlcj4KICApOwp9Cg==
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { api } from "./api";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import Templates from "./pages/Templates";
+import Config from "./pages/Config";
+import Settings from "./pages/Settings";
+import AdminOverview from "./pages/AdminOverview";
+import AdminTenantDetail from "./pages/AdminTenantDetail";
+import AdminRoute from "./components/AdminRoute";
+
+function ProtectedRoute({ tenant, children }) {
+  if (!tenant) return <Navigate to="/login" replace />;
+  return children;
+}
+
+export default function App() {
+  const [tenant, setTenant] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function restoreSession() {
+      try {
+        const token = await api.restoreSession();
+        if (!token) return;
+
+        const current = await api.getMe();
+        const currentTenant = current && (current.tenant || current);
+        if (!currentTenant || !currentTenant.id) {
+          throw new Error("Invalid session profile");
+        }
+        if (active) setTenant(currentTenant);
+      } catch {
+        if (active) setTenant(null);
+      } finally {
+        if (active) setReady(true);
+      }
+    }
+
+    restoreSession();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function handleAuth(tenantData) {
+    setTenant(tenantData);
+  }
+
+  function handleLogout() {
+    api.logout().finally(function () {
+      setTenant(null);
+    });
+  }
+
+  function handleTenantUpdate(updated) {
+    setTenant(updated);
+  }
+
+  if (!ready) return null;
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={tenant ? <Navigate to="/" replace /> : <Login onAuth={handleAuth} />} />
+        <Route path="/forgot-password" element={tenant ? <Navigate to="/" replace /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/" element={<ProtectedRoute tenant={tenant}><Templates tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/config/:slug" element={<ProtectedRoute tenant={tenant}><Config tenant={tenant} /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute tenant={tenant}><Settings tenant={tenant} onLogout={handleLogout} onUpdate={handleTenantUpdate} /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute tenant={tenant}><AdminOverview tenant={tenant} onLogout={handleLogout} /></AdminRoute>} />
+        <Route path="/admin/tenants/:id" element={<AdminRoute tenant={tenant}><AdminTenantDetail /></AdminRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
