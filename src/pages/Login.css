@@ -195,7 +195,6 @@
   cursor: pointer;
   transition: color 0.15s ease;
   line-height: 0;
-  /* Ensure it sits above the input */
   z-index: 1;
 }
 
@@ -222,6 +221,35 @@
   border: 1px solid #FECACA;
   padding: 10px 12px;
   border-radius: var(--radius);
+}
+
+/* ─── Resend verification button ─── */
+.resend-btn {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent-text);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  width: 100%;
+}
+
+.resend-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.resend-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.resend-success {
+  font-size: 13px;
+  color: var(--success, #16a34a);
 }
 
 .toggle-auth {
