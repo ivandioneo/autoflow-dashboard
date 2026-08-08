@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { api } from "../api";
 import "./Login.css";
 
+const UNVERIFIED_MSG = "verify your email";
+
 export default function Login({ onAuth }) {
   const [isRegister, setIsRegister] = useState(false);
   const [name, setName] = useState("");
@@ -12,10 +14,15 @@ export default function Login({ onAuth }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifyPending, setVerifyPending] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
+
+  const isUnverifiedError = error.toLowerCase().includes(UNVERIFIED_MSG);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setResendMsg("");
     setLoading(true);
 
     try {
@@ -40,9 +47,36 @@ export default function Login({ onAuth }) {
     }
   }
 
+  async function handleResend() {
+    setResendLoading(true);
+    setResendMsg("");
+    try {
+      await api.resendVerification(email, password);
+      setError("");
+      setVerifyPending(true);
+    } catch (err) {
+      setResendMsg(err.message || "Failed to resend. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  async function handleResendFromPending() {
+    setResendLoading(true);
+    setResendMsg("");
+    try {
+      await api.resendVerification(email, password);
+      setResendMsg("A new verification email has been sent.");
+    } catch (err) {
+      setResendMsg(err.message || "Failed to resend. Please try again.");
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
   return (
     <div className="login-page">
-      {/* Brand panel — collapses to a slim header on mobile */}
+      {/* Brand panel */}
       <div className="login-brand">
         <div className="login-brand-orb login-brand-orb-1" />
         <div className="login-brand-orb login-brand-orb-2" />
@@ -65,6 +99,7 @@ export default function Login({ onAuth }) {
           </div>
         </div>
       </div>
+
       <div className="login-form-panel">
         <div className="login-card">
           {verifyPending ? (
@@ -75,15 +110,31 @@ export default function Login({ onAuth }) {
                 We sent a verification link to <strong>{email}</strong>.<br />
                 Verify your email before signing in.
               </p>
+              {resendMsg && (
+                <p className={resendMsg.includes("sent") ? "resend-success" : "error-msg"}
+                  style={{ marginTop: "12px", fontSize: "13px" }}>
+                  {resendMsg}
+                </p>
+              )}
               <button
                 className="primary login-btn"
+                style={{ marginTop: "16px" }}
                 onClick={() => {
                   setVerifyPending(false);
                   setIsRegister(false);
                   setPassword("");
+                  setResendMsg("");
                 }}
               >
                 Back to sign in
+              </button>
+              <button
+                className="resend-btn"
+                onClick={handleResendFromPending}
+                disabled={resendLoading}
+                style={{ marginTop: "10px" }}
+              >
+                {resendLoading ? "Sending..." : "Resend verification email"}
               </button>
             </div>
           ) : (
@@ -139,7 +190,22 @@ export default function Login({ onAuth }) {
                     </button>
                   </div>
                 </div>
-                {error && <div className="error-msg">{error}</div>}
+                {error && (
+                  <div className="error-msg">
+                    {error}
+                    {isUnverifiedError && (
+                      <button
+                        type="button"
+                        className="resend-btn"
+                        onClick={handleResend}
+                        disabled={resendLoading}
+                        style={{ display: "block", marginTop: "8px" }}
+                      >
+                        {resendLoading ? "Sending..." : "Resend verification email"}
+                      </button>
+                    )}
+                  </div>
+                )}
                 <button type="submit" className="primary login-btn" disabled={loading}>
                   {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
                 </button>
