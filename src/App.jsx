@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "./api";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Templates from "./pages/Templates";
 import Config from "./pages/Config";
 import Settings from "./pages/Settings";
@@ -65,6 +67,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={tenant ? <Navigate to="/" replace /> : <Login onAuth={handleAuth} />} />
+        <Route path="/forgot-password" element={tenant ? <Navigate to="/" replace /> : <ForgotPassword />} />
+        <Route path="/reset-password" element={tenant ? <Navigate to="/" replace /> : <ResetPassword />} />
         <Route path="/" element={<ProtectedRoute tenant={tenant}><Templates tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/config/:slug" element={<ProtectedRoute tenant={tenant}><Config tenant={tenant} /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute tenant={tenant}><Settings tenant={tenant} onLogout={handleLogout} onUpdate={handleTenantUpdate} /></ProtectedRoute>} />

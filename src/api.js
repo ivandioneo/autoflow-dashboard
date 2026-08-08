@@ -133,6 +133,20 @@ export const api = {
       skipAuth: true,
     });
   },
+  forgotPassword: function (email) {
+    return request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email: email }),
+      skipAuth: true,
+    });
+  },
+  resetPassword: function (token, new_password) {
+    return request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ token: token, new_password: new_password }),
+      skipAuth: true,
+    });
+  },
   getTemplates: function () { return request("/templates/"); },
   getConfigs: function (tenantId) { return request("/tenants/" + tenantId + "/configs"); },
   createConfig: function (tenantId, data) { return request("/tenants/" + tenantId + "/configs", { method: "POST", body: JSON.stringify(data) }); },
@@ -144,4 +158,5 @@ export const api = {
   getAdminActivity: function () { return request("/admin/activity"); },
   getAdminAudit: function () { return request("/admin/audit"); },
   updateTenantPlan: function (tenantId, plan) { return request("/admin/tenants/" + tenantId + "/plan?plan=" + encodeURIComponent(plan), { method: "PATCH" }); },
+  adminResetTenantPassword: function (tenantId) { return request("/admin/tenants/" + tenantId + "/reset-password", { method: "POST" }); },
 };

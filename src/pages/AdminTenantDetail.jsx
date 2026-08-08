@@ -27,6 +27,7 @@ export default function AdminTenantDetail() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
+  const [resetSending, setResetSending] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +66,23 @@ export default function AdminTenantDetail() {
       });
   }
 
+  function sendPasswordReset() {
+    if (!window.confirm("Send a password reset email to " + data.email + "?")) return;
+    setResetSending(true);
+    setNotice("");
+    api
+      .adminResetTenantPassword(id)
+      .then(function (res) {
+        setNotice(res.message || "Password reset email sent.");
+      })
+      .catch(function (err) {
+        setError(err.message);
+      })
+      .finally(function () {
+        setResetSending(false);
+      });
+  }
+
   if (loading) {
     return (
       <div className="admin-shell">
@@ -87,7 +105,7 @@ export default function AdminTenantDetail() {
   }
 
   const configs = data.configs || [];
-  const activity = data.activity || [];
+  const activity = data.activity || data.recent_activity || [];
 
   return (
     <div className="admin-shell">
@@ -160,10 +178,26 @@ export default function AdminTenantDetail() {
       </section>
 
       <section className="admin-panel">
+        <h2 className="admin-panel-title">Security</h2>
+        <p className="admin-muted" style={{ marginBottom: "12px" }}>
+          Send a password reset email to this tenant. They will receive a
+          one-time link (expires in 1&nbsp;hour) to set a new password. Their
+          existing sessions will be revoked on completion.
+        </p>
+        <button
+          className="admin-btn"
+          disabled={resetSending}
+          onClick={sendPasswordReset}
+        >
+          {resetSending ? "Sending…" : "Send password reset email"}
+        </button>
+      </section>
+
+      <section className="admin-panel">
         <h2 className="admin-panel-title">Automations</h2>
         {configs.length === 0 ? (
           <div className="admin-empty">
-            <p>This tenant hasn't set up any automations.</p>
+            <p>This tenant hasn&apos;t set up any automations.</p>
           </div>
         ) : (
           <ul className="admin-list">
@@ -214,7 +248,7 @@ export default function AdminTenantDetail() {
                     )}
                   </span>
                   <span className="admin-muted admin-feed-time">
-                    {new Date(item.timestamp).toLocaleString()}
+                    {new Date(item.timestamp || item.created_at).toLocaleString()}
                   </span>
                 </li>
               );

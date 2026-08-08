@@ -1,38 +1,54 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import "./Login.css";
 
-export default function Login({ onAuth }) {
-  const [isRegister, setIsRegister] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+export default function ResetPassword() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get("token") || "";
+
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [verifyPending, setVerifyPending] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  if (!token) {
+    return (
+      <div className="login-page">
+        <div className="login-form-panel">
+          <div className="login-card">
+            <div className="verify-pending">
+              <div className="verify-pending-icon" style={{ color: "var(--color-error, #a12c7b)" }}>✕</div>
+              <h2>Invalid link</h2>
+              <p>This reset link is missing or malformed. Please request a new one.</p>
+              <button className="primary login-btn" onClick={() => navigate("/forgot-password")}>
+                Request new link
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
     setLoading(true);
-
     try {
-      let result;
-      if (isRegister) {
-        if (!name.trim()) {
-          setError("Business name is required");
-          setLoading(false);
-          return;
-        }
-        await api.register(name, email, password);
-        setVerifyPending(true);
-        return;
-      } else {
-        result = await api.login(email, password);
-      }
-      onAuth(result.tenant);
+      await api.resetPassword(token, password);
+      setDone(true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,7 +58,6 @@ export default function Login({ onAuth }) {
 
   return (
     <div className="login-page">
-      {/* Brand panel — collapses to a slim header on mobile */}
       <div className="login-brand">
         <div className="login-brand-orb login-brand-orb-1" />
         <div className="login-brand-orb login-brand-orb-2" />
@@ -55,68 +70,39 @@ export default function Login({ onAuth }) {
             Your business on <span className="login-accent">autopilot.</span>
           </h2>
           <p className="login-brand-sub">
-            Reminders, follow-ups, and confirmations that run on their own — so
-            you can focus on the work that matters.
+            Reminders, follow-ups, and confirmations that run on their own.
           </p>
-          <div className="login-brand-points">
-            <span>✦ Automated appointment reminders</span>
-            <span>✦ Every account fully isolated</span>
-            <span>✦ Built for UAE businesses</span>
-          </div>
         </div>
       </div>
+
       <div className="login-form-panel">
         <div className="login-card">
-          {verifyPending ? (
+          {done ? (
             <div className="verify-pending">
-              <div className="verify-pending-icon">✉</div>
-              <h2>Check your inbox</h2>
-              <p>
-                We sent a verification link to <strong>{email}</strong>.<br />
-                Verify your email before signing in.
-              </p>
-              <button
-                className="primary login-btn"
-                onClick={() => {
-                  setVerifyPending(false);
-                  setIsRegister(false);
-                  setPassword("");
-                }}
-              >
-                Back to sign in
+              <div className="verify-pending-icon">✓</div>
+              <h2>Password updated</h2>
+              <p>Your new password is set. Sign in to continue.</p>
+              <button className="primary login-btn" style={{ marginTop: "20px" }} onClick={() => navigate("/login")}>
+                Go to sign in
               </button>
             </div>
           ) : (
             <>
               <div className="login-header">
-                <h1>{isRegister ? "Create your account" : "Welcome back"}</h1>
-                <p>
-                  {isRegister
-                    ? "Set up your AutoFlow dashboard"
-                    : "Sign in to your dashboard"}
-                </p>
+                <h1>Set new password</h1>
+                <p>Choose a strong password for your account.</p>
               </div>
               <form onSubmit={handleSubmit} className="login-form">
-                {isRegister && (
-                  <div className="field">
-                    <label>Business name</label>
-                    <input type="text" placeholder="Glow Salon" value={name} onChange={(e) => setName(e.target.value)} />
-                  </div>
-                )}
                 <div className="field">
-                  <label>Email</label>
-                  <input type="email" placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </div>
-                <div className="field">
-                  <label>Password</label>
+                  <label>New password</label>
                   <div className="field-password">
                     <input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter password"
+                      placeholder="At least 8 characters"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                     <button
                       type="button"
@@ -139,22 +125,21 @@ export default function Login({ onAuth }) {
                     </button>
                   </div>
                 </div>
+                <div className="field">
+                  <label>Confirm password</label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Repeat your password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    required
+                  />
+                </div>
                 {error && <div className="error-msg">{error}</div>}
                 <button type="submit" className="primary login-btn" disabled={loading}>
-                  {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
+                  {loading ? "Saving…" : "Set new password"}
                 </button>
               </form>
-              {!isRegister && (
-                <p className="toggle-auth" style={{ marginTop: "8px" }}>
-                  <Link to="/forgot-password" style={{ fontSize: "13px" }}>Forgot password?</Link>
-                </p>
-              )}
-              <p className="toggle-auth">
-                {isRegister ? "Already have an account?" : "No account?"}{" "}
-                <span onClick={() => { setIsRegister(!isRegister); setError(""); setShowPassword(false); }}>
-                  {isRegister ? "Sign in" : "Create one"}
-                </span>
-              </p>
             </>
           )}
         </div>
