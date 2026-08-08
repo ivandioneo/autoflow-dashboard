@@ -195,7 +195,6 @@
   cursor: pointer;
   transition: color 0.15s ease;
   line-height: 0;
-  /* Ensure it sits above the input */
   z-index: 1;
 }
 
@@ -216,6 +215,9 @@
 }
 
 .error-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   font-size: 13px;
   color: var(--danger);
   background: var(--danger-bg);
@@ -239,6 +241,98 @@
 
 .toggle-auth span:hover {
   text-decoration: underline;
+}
+
+/* ─── Verify pending screen ─── */
+.verify-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.verify-pending-icon {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.verify-pending h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.verify-pending p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 28ch;
+}
+
+/* Standalone resend button (on verify-pending screen) */
+.resend-btn {
+  margin-top: 4px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.resend-btn:hover:not(:disabled) {
+  background: var(--accent-bg, rgba(13,148,136,0.08));
+  border-color: var(--accent);
+}
+
+.resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resend-success {
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* Inline resend link inside .error-msg */
+.resend-inline-btn {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--danger);
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.resend-inline-btn:hover:not(:disabled) {
+  opacity: 0.75;
+}
+
+.resend-inline-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resend-inline-ok {
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.resend-inline-err {
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ─── Mobile: collapse to a slim brand header + form ─── */
