@@ -12,10 +12,19 @@ export default function Login({ onAuth }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifyPending, setVerifyPending] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
+  const [resendError, setResendError] = useState("");
+
+  // True when the login error is specifically the "verify your email" 403
+  const isUnverifiedError =
+    error.toLowerCase().includes("verify your email");
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setResendDone(false);
+    setResendError("");
     setLoading(true);
 
     try {
@@ -37,6 +46,20 @@ export default function Login({ onAuth }) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleResend() {
+    setResendLoading(true);
+    setResendDone(false);
+    setResendError("");
+    try {
+      await api.resendVerification(email, password);
+      setResendDone(true);
+    } catch (err) {
+      setResendError(err.message || "Could not resend. Please try again.");
+    } finally {
+      setResendLoading(false);
     }
   }
 
@@ -65,6 +88,7 @@ export default function Login({ onAuth }) {
           </div>
         </div>
       </div>
+
       <div className="login-form-panel">
         <div className="login-card">
           {verifyPending ? (
@@ -75,12 +99,32 @@ export default function Login({ onAuth }) {
                 We sent a verification link to <strong>{email}</strong>.<br />
                 Verify your email before signing in.
               </p>
+
+              {/* Resend section */}
+              {resendDone ? (
+                <p className="resend-success">Verification email resent — check your inbox.</p>
+              ) : (
+                <>
+                  <button
+                    className="resend-btn"
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                  >
+                    {resendLoading ? "Sending…" : "Resend verification email"}
+                  </button>
+                  {resendError && <p className="error-msg" style={{ marginTop: "8px" }}>{resendError}</p>}
+                </>
+              )}
+
               <button
                 className="primary login-btn"
+                style={{ marginTop: "16px" }}
                 onClick={() => {
                   setVerifyPending(false);
                   setIsRegister(false);
                   setPassword("");
+                  setResendDone(false);
+                  setResendError("");
                 }}
               >
                 Back to sign in
@@ -100,12 +144,23 @@ export default function Login({ onAuth }) {
                 {isRegister && (
                   <div className="field">
                     <label>Business name</label>
-                    <input type="text" placeholder="Glow Salon" value={name} onChange={(e) => setName(e.target.value)} />
+                    <input
+                      type="text"
+                      placeholder="Glow Salon"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
                   </div>
                 )}
                 <div className="field">
                   <label>Email</label>
-                  <input type="email" placeholder="you@yourbusiness.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <input
+                    type="email"
+                    placeholder="you@yourbusiness.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="field">
                   <label>Password</label>
@@ -139,9 +194,40 @@ export default function Login({ onAuth }) {
                     </button>
                   </div>
                 </div>
-                {error && <div className="error-msg">{error}</div>}
-                <button type="submit" className="primary login-btn" disabled={loading}>
-                  {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
+
+                {error && (
+                  <div className="error-msg">
+                    {error}
+                    {/* Inline resend prompt when login is blocked by unverified email */}
+                    {isUnverifiedError && !resendDone && (
+                      <button
+                        type="button"
+                        className="resend-inline-btn"
+                        onClick={handleResend}
+                        disabled={resendLoading}
+                      >
+                        {resendLoading ? "Sending…" : "Resend verification email"}
+                      </button>
+                    )}
+                    {isUnverifiedError && resendDone && (
+                      <span className="resend-inline-ok"> Verification email sent — check your inbox.</span>
+                    )}
+                    {isUnverifiedError && resendError && (
+                      <span className="resend-inline-err"> {resendError}</span>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="primary login-btn"
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Please wait..."
+                    : isRegister
+                    ? "Create account"
+                    : "Sign in"}
                 </button>
               </form>
               {!isRegister && (
@@ -151,7 +237,15 @@ export default function Login({ onAuth }) {
               )}
               <p className="toggle-auth">
                 {isRegister ? "Already have an account?" : "No account?"}{" "}
-                <span onClick={() => { setIsRegister(!isRegister); setError(""); setShowPassword(false); }}>
+                <span
+                  onClick={() => {
+                    setIsRegister(!isRegister);
+                    setError("");
+                    setShowPassword(false);
+                    setResendDone(false);
+                    setResendError("");
+                  }}
+                >
                   {isRegister ? "Sign in" : "Create one"}
                 </span>
               </p>
