@@ -44,8 +44,7 @@ export default function AdminOverview({ tenant, onLogout }) {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState("activity");
-  const [audit, setAudit] = useState([]);
+  const [recentAudit, setRecentAudit] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,14 +53,15 @@ export default function AdminOverview({ tenant, onLogout }) {
       api.getAdminStats(),
       api.getAdminTenants(),
       api.getAdminActivity(),
-      api.getAdminAudit(),
+      api.getAdminAuditPaged({ limit: 5, offset: 0 }),
     ])
       .then(function (results) {
         if (cancelled) return;
         setStats(results[0]);
         setTenants(results[1] || []);
         setActivity(results[2] || []);
-        setAudit(results[3] || []);
+        const auditResult = results[3];
+        setRecentAudit(auditResult && auditResult.items ? auditResult.items : []);
       })
       .catch(function (err) {
         if (!cancelled) setError(err.message);
@@ -100,8 +100,6 @@ export default function AdminOverview({ tenant, onLogout }) {
     );
   }
 
-  const feed = tab === "activity" ? activity : audit;
-
   return (
     <div className="admin-shell">
       <header className="admin-header">
@@ -110,6 +108,9 @@ export default function AdminOverview({ tenant, onLogout }) {
           <h1 className="admin-title">Platform overview</h1>
         </div>
         <nav className="admin-nav">
+          <Link to="/admin/audit" className="admin-link">
+            Audit log
+          </Link>
           <Link to="/" className="admin-link">
             Tenant view
           </Link>
@@ -210,70 +211,65 @@ export default function AdminOverview({ tenant, onLogout }) {
       </section>
 
       <section className="admin-panel">
-        <div className="admin-tabs">
-          <button
-            className={
-              tab === "activity" ? "admin-tab admin-tab-on" : "admin-tab"
-            }
-            onClick={() => setTab("activity")}
-          >
-            Automation runs
-          </button>
-          <button
-            className={tab === "audit" ? "admin-tab admin-tab-on" : "admin-tab"}
-            onClick={() => setTab("audit")}
-          >
-            Security events
-          </button>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <h2 className="admin-panel-title" style={{ margin: 0 }}>Automation runs</h2>
         </div>
-
-        {feed.length === 0 ? (
+        {activity.length === 0 ? (
           <div className="admin-empty">
-            {tab === "activity" ? (
-              <>
-                <p>No automation runs recorded yet.</p>
-                <p className="admin-muted">
-                  Runs appear here once your Activepieces flows post to
-                  /engine/log at the end of each execution.
-                </p>
-              </>
-            ) : (
-              <p>No security events recorded yet.</p>
-            )}
+            <p>No automation runs recorded yet.</p>
+            <p className="admin-muted">
+              Runs appear here once your Activepieces flows post to
+              /engine/log at the end of each execution.
+            </p>
           </div>
         ) : (
           <ul className="admin-feed">
-            {feed.map(function (item, i) {
-              const label = item.action || item.template_slug || "event";
-              const failed =
-                label.indexOf("failed") !== -1 ||
-                item.status === "error" ||
-                item.status === "failed";
+            {activity.slice(0, 20).map(function (item, i) {
+              const label = item.template_slug || "event";
+              const failed = item.status === "error" || item.status === "failed";
               return (
                 <li key={item.id || i} className="admin-feed-item">
-                  <span
-                    className={
-                      failed
-                        ? "admin-dot admin-dot-bad"
-                        : "admin-dot admin-dot-ok"
-                    }
-                  />
+                  <span className={failed ? "admin-dot admin-dot-bad" : "admin-dot admin-dot-ok"} />
                   <span className="admin-feed-main">
                     <span className="admin-mono">{label}</span>
                     {formatDetails(item.details) && (
-                      <span className="admin-muted">
-                        {" · " + formatDetails(item.details)}
-                      </span>
+                      <span className="admin-muted">{" · " + formatDetails(item.details)}</span>
+                    )}
+                  </span>
+                  <span className="admin-muted admin-feed-time">{timeAgo(item.created_at)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section className="admin-panel">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <h2 className="admin-panel-title" style={{ margin: 0 }}>Recent security events</h2>
+          <Link to="/admin/audit" className="admin-link" style={{ fontSize: "0.85rem" }}>
+            View full audit log →
+          </Link>
+        </div>
+        {recentAudit.length === 0 ? (
+          <div className="admin-empty"><p>No security events recorded yet.</p></div>
+        ) : (
+          <ul className="admin-feed">
+            {recentAudit.map(function (item, i) {
+              const failed = item.action && (item.action.indexOf("fail") !== -1 || item.action.indexOf("denied") !== -1);
+              return (
+                <li key={item.id || i} className="admin-feed-item">
+                  <span className={failed ? "admin-dot admin-dot-bad" : "admin-dot admin-dot-ok"} />
+                  <span className="admin-feed-main">
+                    <span className="admin-mono">{item.action || "—"}</span>
+                    {item.tenant_name && (
+                      <span className="admin-muted">{" · " + item.tenant_name}</span>
                     )}
                   </span>
                   {item.ip_address && (
-                    <span className="admin-muted admin-mono admin-feed-ip">
-                      {item.ip_address}
-                    </span>
+                    <span className="admin-muted admin-mono admin-feed-ip">{item.ip_address}</span>
                   )}
-                  <span className="admin-muted admin-feed-time">
-                    {timeAgo(item.timestamp || item.created_at)}
-                  </span>
+                  <span className="admin-muted admin-feed-time">{timeAgo(item.created_at)}</span>
                 </li>
               );
             })}

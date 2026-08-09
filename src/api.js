@@ -157,6 +157,14 @@ export const api = {
   getAdminTenant: function (tenantId) { return request("/admin/tenants/" + tenantId); },
   getAdminActivity: function () { return request("/admin/activity"); },
   getAdminAudit: function () { return request("/admin/audit"); },
+  getAdminAuditPaged: function ({ limit, offset, action } = {}) {
+    const params = new URLSearchParams();
+    if (limit != null) params.set("limit", limit);
+    if (offset != null) params.set("offset", offset);
+    if (action) params.set("action", action);
+    const qs = params.toString();
+    return request("/admin/audit" + (qs ? "?" + qs : ""));
+  },
   updateTenantPlan: function (tenantId, plan) { return request("/admin/tenants/" + tenantId + "/plan?plan=" + encodeURIComponent(plan), { method: "PATCH" }); },
   adminResetTenantPassword: function (tenantId) { return request("/admin/tenants/" + tenantId + "/reset-password", { method: "POST" }); },
 };
