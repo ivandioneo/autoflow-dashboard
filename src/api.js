@@ -81,6 +81,13 @@ async function request(path, options = {}, isRetry = false) {
   }
   if (res.status === 403) {
     const err = await res.json().catch(function () { return { detail: "You don't have access to this." }; });
+    // 403 from /auth/refresh means the session belongs to an unverified tenant.
+    // Treat it as session loss: clear state and redirect to login cleanly.
+    if (path === "/auth/refresh") {
+      clearSession();
+      window.location.href = "/login";
+      return;
+    }
     throw new Error(typeof err.detail === "string" ? err.detail : "You don't have access to this.");
   }
   if (!res.ok) {

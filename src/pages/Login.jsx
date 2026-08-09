@@ -12,10 +12,13 @@ export default function Login({ onAuth }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [verifyPending, setVerifyPending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resending, setResending] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setResendSent(false);
     setLoading(true);
 
     try {
@@ -39,6 +42,25 @@ export default function Login({ onAuth }) {
       setLoading(false);
     }
   }
+
+  async function handleResend() {
+    setResending(true);
+    try {
+      await api.resendVerification(email, password);
+      setResendSent(true);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResending(false);
+    }
+  }
+
+  const showResend =
+    !isRegister &&
+    error &&
+    error.toLowerCase().includes("verify") &&
+    !resendSent;
 
   return (
     <div className="login-page">
@@ -140,6 +162,21 @@ export default function Login({ onAuth }) {
                   </div>
                 </div>
                 {error && <div className="error-msg">{error}</div>}
+                {showResend && (
+                  <button
+                    type="button"
+                    className="ghost resend-btn"
+                    onClick={handleResend}
+                    disabled={resending}
+                  >
+                    {resending ? "Sending..." : "Resend verification email"}
+                  </button>
+                )}
+                {resendSent && (
+                  <div className="success-msg">
+                    Verification email sent — check your inbox.
+                  </div>
+                )}
                 <button type="submit" className="primary login-btn" disabled={loading}>
                   {loading ? "Please wait..." : isRegister ? "Create account" : "Sign in"}
                 </button>
@@ -151,7 +188,7 @@ export default function Login({ onAuth }) {
               )}
               <p className="toggle-auth">
                 {isRegister ? "Already have an account?" : "No account?"}{" "}
-                <span onClick={() => { setIsRegister(!isRegister); setError(""); setShowPassword(false); }}>
+                <span onClick={() => { setIsRegister(!isRegister); setError(""); setResendSent(false); setShowPassword(false); }}>
                   {isRegister ? "Sign in" : "Create one"}
                 </span>
               </p>
