@@ -9,6 +9,9 @@ export default function Settings({ tenant, onLogout, onUpdate }) {
   const [email, setEmail] = useState(tenant.email);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [copied, setCopied] = useState(false);
+
   async function handleSave() {
     setSaving(true);
     setSaved(false);
@@ -23,12 +26,22 @@ export default function Settings({ tenant, onLogout, onUpdate }) {
       setSaving(false);
     }
   }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(tenant.api_key).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   const planLabel = { free: "Free plan", basic: "Basic plan", pro: "Pro plan" };
   const planTemplates = { free: "2 automation templates", basic: "5 automation templates", pro: "Unlimited templates" };
+
   return (
     <div className="page-container">
       <button className="ghost back-btn" onClick={() => navigate("/")}>&larr; Back</button>
       <h1 className="settings-title">Settings</h1>
+
       <div className="settings-section">
         <h2>Account</h2>
         <div className="section-fields">
@@ -37,6 +50,7 @@ export default function Settings({ tenant, onLogout, onUpdate }) {
         </div>
         <button className="primary save-section-btn" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : saved ? "Saved" : "Save changes"}</button>
       </div>
+
       <div className="settings-section">
         <h2>Plan</h2>
         <div className="plan-row">
@@ -44,6 +58,29 @@ export default function Settings({ tenant, onLogout, onUpdate }) {
           <button className="upgrade-btn">Upgrade</button>
         </div>
       </div>
+
+      <div className="settings-section">
+        <h2>Developer</h2>
+        <div className="field">
+          <label>API Key</label>
+          <div className="api-key-row">
+            <input
+              className="api-key-input"
+              type={showKey ? "text" : "password"}
+              value={tenant.api_key || ""}
+              readOnly
+            />
+            <button className="ghost" onClick={() => setShowKey((v) => !v)}>
+              {showKey ? "Hide" : "Show"}
+            </button>
+            <button className="ghost" onClick={handleCopy}>
+              {copied ? "Copied!" : "Copy"}
+            </button>
+          </div>
+          <p className="api-key-hint">Use this key in the <code>X-API-Key</code> header when calling the AutoFlow API.</p>
+        </div>
+      </div>
+
       <div className="settings-section danger-zone"><button className="ghost danger-btn" onClick={onLogout}>Sign out</button></div>
     </div>
   );
