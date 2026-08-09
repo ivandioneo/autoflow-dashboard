@@ -11,9 +11,6 @@ function getToken() {
 
 function clearSession() {
   accessToken = null;
-  localStorage.removeItem("autoflow_token");
-  localStorage.removeItem("autoflow_refresh");
-  localStorage.removeItem("autoflow_tenant");
 }
 
 function saveAccessToken(data) {
@@ -81,7 +78,10 @@ async function request(path, options = {}, isRetry = false) {
   }
   if (res.status === 403) {
     const err = await res.json().catch(function () { return { detail: "You don't have access to this." }; });
-    throw new Error(typeof err.detail === "string" ? err.detail : "You don't have access to this.");
+    const msg = typeof err.detail === "string" ? err.detail : "You don't have access to this.";
+    const error = new Error(msg);
+    error.status = 403;
+    throw error;
   }
   if (!res.ok) {
     const err = await res.json().catch(function () { return { detail: "Request failed" }; });
