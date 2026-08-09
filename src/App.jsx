@@ -9,6 +9,7 @@ import Config from "./pages/Config";
 import Settings from "./pages/Settings";
 import AdminOverview from "./pages/AdminOverview";
 import AdminTenantDetail from "./pages/AdminTenantDetail";
+import AdminAuditLog from "./pages/AdminAuditLog";
 import AdminRoute from "./components/AdminRoute";
 
 function ProtectedRoute({ tenant, children }) {
@@ -74,6 +75,7 @@ export default function App() {
         <Route path="/settings" element={<ProtectedRoute tenant={tenant}><Settings tenant={tenant} onLogout={handleLogout} onUpdate={handleTenantUpdate} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute tenant={tenant}><AdminOverview tenant={tenant} onLogout={handleLogout} /></AdminRoute>} />
         <Route path="/admin/tenants/:id" element={<AdminRoute tenant={tenant}><AdminTenantDetail /></AdminRoute>} />
+        <Route path="/admin/audit" element={<AdminRoute tenant={tenant}><AdminAuditLog /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

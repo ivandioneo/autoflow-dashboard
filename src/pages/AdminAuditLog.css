@@ -1,0 +1,104 @@
+/* Audit log page — extends Admin.css */
+
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+
+.audit-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #e4e8ed;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: inherit;
+  outline: none;
+}
+
+.audit-search:focus {
+  border-color: #94a3b8;
+}
+
+.audit-select {
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #e4e8ed;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+}
+
+.audit-select:focus {
+  border-color: #94a3b8;
+}
+
+.audit-clear {
+  color: #7b8794;
+  font-size: 0.82rem;
+}
+
+.audit-count {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.audit-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.audit-dot-ok  { background: #16794c; }
+.audit-dot-bad { background: #c0392b; }
+
+.audit-tenant-link {
+  color: #1a202c;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.audit-tenant-link:hover {
+  text-decoration: underline;
+}
+
+.audit-details {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.audit-load-more {
+  text-align: center;
+  padding: 1rem 0 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .audit-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .audit-select {
+    width: 100%;
+  }
+  .audit-details {
+    display: none;
+  }
+}
