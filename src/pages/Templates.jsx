@@ -63,6 +63,9 @@ export default function Templates({ tenant, onLogout }) {
               Admin
             </button>
           )}
+          <button className="secondary" onClick={() => navigate("/logs")}>
+            Run History
+          </button>
           <button className="secondary" onClick={() => navigate("/settings")}>
             Settings
           </button>
