@@ -1,23 +1,24 @@
-/* BookingPage.css — public customer-facing booking form */
+/* Public booking page — standalone, no auth required */
 
 .bp-shell {
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem 1rem;
   background: #f7f6f2;
+  padding: 2rem 1rem 4rem;
 }
 
 .bp-card {
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  padding: 2.5rem 2rem;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px oklch(0.2 0.01 80 / 0.09);
+  padding: 2.5rem 2rem;
 }
 
+/* ── Logo ───────────────────────────────────────────────────── */
 .bp-logo {
   max-height: 48px;
   max-width: 160px;
@@ -25,25 +26,27 @@
   margin-bottom: 1.25rem;
 }
 
+/* ── Heading ────────────────────────────────────────────────── */
 .bp-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.375rem, 3vw, 1.75rem);
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  color: #28251d;
+  margin: 0 0 0.5rem;
   line-height: 1.2;
 }
 
 .bp-description {
   font-size: 0.9375rem;
-  color: #6b6a68;
-  margin-bottom: 1.75rem;
+  color: #7a7974;
+  margin: 0 0 1.75rem;
   line-height: 1.55;
 }
 
+/* ── Form ────────────────────────────────────────────────────── */
 .bp-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.125rem;
 }
 
 .bp-field {
@@ -54,89 +57,141 @@
 
 .bp-field label {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #28251d;
 }
 
 .bp-optional {
   font-weight: 400;
-  color: #9a9997;
+  color: #7a7974;
 }
 
 .bp-field input,
+.bp-field select,
 .bp-field textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
   border: 1px solid #d4d1ca;
   border-radius: 0.5rem;
-  padding: 0.625rem 0.75rem;
   font-size: 0.9375rem;
   color: #28251d;
-  background: #fafaf8;
+  background: #fff;
   transition: border-color 180ms ease, box-shadow 180ms ease;
-  resize: vertical;
   outline: none;
+  appearance: none;
 }
 
 .bp-field input:focus,
+.bp-field select:focus,
 .bp-field textarea:focus {
   border-color: #01696f;
-  box-shadow: 0 0 0 3px rgba(1, 105, 111, 0.12);
-  background: #fff;
+  box-shadow: 0 0 0 3px oklch(0.48 0.09 192 / 0.15);
 }
 
+.bp-field input::placeholder,
+.bp-field textarea::placeholder {
+  color: #bab9b4;
+}
+
+.bp-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.bp-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7974' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.25rem;
+}
+
+/* ── Type toggle ─────────────────────────────────────────────── */
+.bp-toggle {
+  display: flex;
+  border: 1px solid #d4d1ca;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.bp-toggle-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #7a7974;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+  text-align: center;
+}
+
+.bp-toggle-btn + .bp-toggle-btn {
+  border-left: 1px solid #d4d1ca;
+}
+
+.bp-toggle-btn.active {
+  background: #01696f;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── Submit button ───────────────────────────────────────────── */
 .bp-submit {
   margin-top: 0.5rem;
+  padding: 0.75rem 1.25rem;
   background: #01696f;
   color: #fff;
   border: none;
   border-radius: 0.5rem;
-  padding: 0.75rem 1.25rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 180ms ease;
-  min-height: 44px;
+  width: 100%;
 }
 
-.bp-submit:hover:not(:disabled) {
+.bp-submit:hover {
   background: #0c4e54;
 }
 
 .bp-submit:disabled {
-  opacity: 0.6;
+  background: #7a7974;
   cursor: not-allowed;
 }
 
+/* ── Error / success states ──────────────────────────────────── */
 .bp-submit-error {
   font-size: 0.875rem;
   color: #a12c7b;
-  margin-top: -0.25rem;
+  background: #f9f0f5;
+  border: 1px solid #e0ced7;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  margin: 0;
 }
 
-.bp-powered {
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  color: #bab9b4;
-  text-align: center;
-}
-
-/* Success / Error states */
-.bp-card-success,
-.bp-card-error {
+.bp-card-error,
+.bp-card-success {
   text-align: center;
   padding: 3rem 2rem;
 }
 
-.bp-success-icon,
-.bp-error-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 9999px;
+.bp-error-icon,
+.bp-success-icon {
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 auto 1.25rem;
+  border-radius: 9999px;
+  margin: 0 auto 1rem;
+}
+
+.bp-error-icon {
+  background: #f9f0f5;
+  color: #a12c7b;
 }
 
 .bp-success-icon {
@@ -144,44 +199,49 @@
   color: #437a22;
 }
 
-.bp-error-icon {
-  background: #e0ced7;
-  color: #a12c7b;
-}
-
-.bp-card-success h2,
-.bp-card-error h2 {
+.bp-card-error h2,
+.bp-card-success h2 {
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+  color: #28251d;
+  margin: 0 0 0.5rem;
 }
 
-.bp-card-success p,
-.bp-card-error p {
+.bp-card-error p,
+.bp-card-success p {
+  color: #7a7974;
   font-size: 0.9375rem;
-  color: #6b6a68;
 }
 
-/* Skeleton loader */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* ── Footer ──────────────────────────────────────────────────── */
+.bp-powered {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #bab9b4;
+}
+
+/* ── Skeleton ────────────────────────────────────────────────── */
+@keyframes bp-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
 .bp-skeleton {
-  background: linear-gradient(90deg, #f0ede8 25%, #e8e5e0 50%, #f0ede8 75%);
+  background: linear-gradient(90deg, #eeede9 25%, #e6e4df 50%, #eeede9 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  animation: bp-shimmer 1.4s ease-in-out infinite;
   border-radius: 0.375rem;
 }
 
-.bp-skeleton-title  { height: 2rem;   width: 60%; margin-bottom: 0.75rem; }
-.bp-skeleton-text   { height: 1rem;   width: 90%; margin-bottom: 0.5rem; }
-.bp-skeleton-short  { width: 65%; margin-bottom: 1.5rem; }
-.bp-skeleton-field  { height: 2.75rem; width: 100%; margin-bottom: 0.75rem; }
-.bp-skeleton-btn    { height: 2.75rem; width: 100%; margin-top: 0.5rem; border-radius: 0.5rem; }
+.bp-skeleton-title  { height: 1.75rem; width: 60%; margin-bottom: 0.75rem; }
+.bp-skeleton-text   { height: 0.875rem; width: 90%; margin-bottom: 0.375rem; }
+.bp-skeleton-short  { width: 50%; margin-bottom: 1.25rem; }
+.bp-skeleton-field  { height: 2.5rem; width: 100%; margin-bottom: 0.75rem; }
+.bp-skeleton-btn    { height: 2.75rem; width: 100%; border-radius: 0.5rem; }
 
-@media (max-width: 520px) {
+/* ── Mobile ──────────────────────────────────────────────────── */
+@media (max-width: 480px) {
   .bp-card { padding: 1.75rem 1.25rem; }
+  .bp-toggle { flex-direction: column; }
+  .bp-toggle-btn + .bp-toggle-btn { border-left: none; border-top: 1px solid #d4d1ca; }
 }
