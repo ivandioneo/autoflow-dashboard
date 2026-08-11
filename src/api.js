@@ -152,6 +152,10 @@ export const api = {
   createConfig: function (tenantId, data) { return request("/tenants/" + tenantId + "/configs", { method: "POST", body: JSON.stringify(data) }); },
   updateConfig: function (tenantId, configId, data) { return request("/tenants/" + tenantId + "/configs/" + configId, { method: "PATCH", body: JSON.stringify(data) }); },
   updateTenant: function (tenantId, data) { return request("/tenants/" + tenantId, { method: "PATCH", body: JSON.stringify(data) }); },
+  getLogs: function (tenantId, params) {
+    const qs = new URLSearchParams(params || {}).toString();
+    return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
+  },
   getAdminStats: function () { return request("/admin/stats"); },
   getAdminTenants: function () { return request("/admin/tenants"); },
   getAdminTenant: function (tenantId) { return request("/admin/tenants/" + tenantId); },
