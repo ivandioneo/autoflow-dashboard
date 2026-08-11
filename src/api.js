@@ -2,6 +2,9 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
   "https://api.autoflow.ivanit.work/api/v1";
 
+// Public booking routes live at the root, not under /api/v1
+const API_ROOT = API_BASE.replace(/\/api\/v1$/, "");
+
 let accessToken = null;
 let refreshInFlight = null;
 
@@ -156,15 +159,26 @@ export const api = {
     const qs = new URLSearchParams(params || {}).toString();
     return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
   },
-  // Booking — public (no auth)
+  // Booking — public (no auth) — use API_ROOT, not API_BASE
   getBookingPage: function (slug) {
-    return request("/b/" + slug, { skipAuth: true });
+    return fetch(API_ROOT + "/b/" + slug)
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Booking page not found");
+          return data;
+        });
+      });
   },
   submitBooking: function (slug, data) {
-    return request("/b/" + slug + "/submit", {
+    return fetch(API_ROOT + "/b/" + slug + "/submit", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
-      skipAuth: true,
+    }).then(function (res) {
+      return res.json().then(function (body) {
+        if (!res.ok) throw new Error(typeof body.detail === "string" ? body.detail : "Submission failed");
+        return body;
+      });
     });
   },
   // Booking — tenant-auth
