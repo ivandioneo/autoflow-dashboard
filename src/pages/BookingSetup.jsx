@@ -1,356 +1,289 @@
-/**
- * Tenant dashboard page — create or edit their booking page.
- * Route: /booking-setup (authenticated)
- * Uses POST /booking/page to create, PUT /booking/page to update.
- */
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import "./BookingSetup.css";
 
-const MODES = [
-  { value: "both", label: "Booking & Quotes" },
-  { value: "booking", label: "Bookings only" },
-  { value: "quote", label: "Quote requests only" },
-];
+const API_PUBLIC_BASE = "https://dashboard.autoflow.ivanit.work";
 
-const EMPTY_SERVICE = { name: "", duration_min: "", price: "" };
+export default function BookingSetup({ tenant, onLogout }) {
+  const [tab, setTab] = useState("setup");
 
-function ServiceRow({ svc, index, onChange, onRemove }) {
-  return (
-    <div className="bs-service-row">
-      <input
-        className="bs-input bs-input--name"
-        type="text"
-        placeholder="Service name"
-        value={svc.name}
-        onChange={(e) => onChange(index, "name", e.target.value)}
-        required
-      />
-      <input
-        className="bs-input bs-input--short"
-        type="number"
-        placeholder="Min"
-        min="1"
-        value={svc.duration_min}
-        onChange={(e) => onChange(index, "duration_min", e.target.value)}
-      />
-      <input
-        className="bs-input bs-input--short"
-        type="text"
-        placeholder="Price"
-        value={svc.price}
-        onChange={(e) => onChange(index, "price", e.target.value)}
-      />
-      <button
-        type="button"
-        className="bs-remove-btn"
-        onClick={() => onRemove(index)}
-        aria-label="Remove service"
-      >
-        &#10005;
-      </button>
-    </div>
-  );
-}
-
-export default function BookingSetup({ tenant }) {
-  const navigate = useNavigate();
-  const [existing, setExisting] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState(null);
-
+  // Setup form state
   const [form, setForm] = useState({
     slug: "",
-    business_name: tenant.name || "",
-    tagline: "",
-    whatsapp_number: "",
-    notification_email: "",
-    mode: "both",
-    active: true,
-    services: [],
+    title: "",
+    description: "",
+    cta_label: "",
+    message_label: "",
+    message_placeholder: "",
+    confirmation_message: "",
   });
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState(null);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [hasPage, setHasPage] = useState(false);
+
+  // Submissions state
+  const [submissions, setSubmissions] = useState([]);
+  const [subsLoading, setSubsLoading] = useState(false);
+  const [subsError, setSubsError] = useState(null);
+  const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
-    api
-      .getOwnBookingPage()
-      .then((data) => {
-        setExisting(data);
-        setForm({
-          slug: data.slug,
-          business_name: data.business_name,
-          tagline: data.tagline || "",
-          whatsapp_number: data.whatsapp_number || "",
-          notification_email: data.notification_email || "",
-          mode: data.mode,
-          active: data.active,
-          services: (data.services || []).map((s) => ({
-            name: s.name || "",
-            duration_min: s.duration_min ?? "",
-            price: s.price || "",
-          })),
-        });
-      })
-      .catch((err) => {
-        // 404 means not created yet — that's fine
-        if (!err.message?.includes("404") && err.status !== 404) {
-          setError(err.message || "Failed to load booking page.");
+    api.getBookingPageConfig()
+      .then(data => {
+        if (data) {
+          setForm({
+            slug: data.slug || "",
+            title: data.title || "",
+            description: data.description || "",
+            cta_label: data.cta_label || "",
+            message_label: data.message_label || "",
+            message_placeholder: data.message_placeholder || "",
+            confirmation_message: data.confirmation_message || "",
+          });
+          setHasPage(true);
         }
       })
-      .finally(() => setLoading(false));
+      .catch(() => {})
+      .finally(() => setPageLoading(false));
   }, []);
 
-  function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
+  useEffect(() => {
+    if (tab !== "submissions") return;
+    setSubsLoading(true);
+    setSubsError(null);
+    api.getSubmissions()
+      .then(setSubmissions)
+      .catch(err => setSubsError(err.message || "Failed to load submissions."))
+      .finally(() => setSubsLoading(false));
+  }, [tab]);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   }
 
-  function addService() {
-    setForm((f) => ({ ...f, services: [...f.services, { ...EMPTY_SERVICE }] }));
-  }
-
-  function updateService(index, field, value) {
-    setForm((f) => {
-      const services = [...f.services];
-      services[index] = { ...services[index], [field]: value };
-      return { ...f, services };
-    });
-  }
-
-  function removeService(index) {
-    setForm((f) => ({
-      ...f,
-      services: f.services.filter((_, i) => i !== index),
-    }));
-  }
-
-  async function handleSubmit(e) {
+  async function handleSave(e) {
     e.preventDefault();
     setSaving(true);
-    setSaved(false);
-    setError(null);
-
+    setSaveError(null);
+    setSaveSuccess(false);
     try {
-      const payload = {
-        business_name: form.business_name,
-        tagline: form.tagline || undefined,
-        whatsapp_number: form.whatsapp_number || undefined,
-        notification_email: form.notification_email || undefined,
-        mode: form.mode,
-        active: form.active,
-        services: form.services
-          .filter((s) => s.name.trim())
-          .map((s) => ({
-            name: s.name.trim(),
-            duration_min: s.duration_min ? Number(s.duration_min) : undefined,
-            price: s.price || undefined,
-          })),
-      };
-
-      if (existing) {
-        await api.updateBookingPage(payload);
-      } else {
-        await api.createBookingPage({ ...payload, slug: form.slug });
-        const fresh = await api.getOwnBookingPage();
-        setExisting(fresh);
-      }
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      await api.createOrUpdateBookingPage(form);
+      setSaveSuccess(true);
+      setHasPage(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
-      setError(err.message || "Failed to save booking page.");
+      setSaveError(err.message || "Save failed.");
     } finally {
       setSaving(false);
     }
   }
 
-  const publicUrl = existing
-    ? `${window.location.origin}/b/${existing.slug}`
-    : null;
+  const publicUrl = form.slug ? API_PUBLIC_BASE + "/b/" + form.slug : null;
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <div>
-          <h1>Booking Page</h1>
-          <p className="subtitle">{tenant.name}</p>
-        </div>
-        <div className="header-actions">
-          {publicUrl && (
-            <a
-              className="secondary"
-              href={publicUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View public page &#8599;
-            </a>
-          )}
-          <button className="secondary" onClick={() => navigate("/")}>
-            &#8592; Automations
-          </button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="bs-loading">
-          <div className="skeleton bs-skeleton--line" />
-          <div className="skeleton bs-skeleton--line" style={{ width: "60%" }} />
-        </div>
-      ) : (
-        <form className="bs-form" onSubmit={handleSubmit} noValidate>
-          {/* Slug — only editable on creation */}
-          <div className="bs-section">
-            <h2 className="bs-section-title">Page URL</h2>
-            <div className="bs-field">
-              <label className="bs-label">Slug</label>
-              {existing ? (
-                <div className="bs-slug-locked">
-                  <code>{existing.slug}</code>
-                  <span className="bs-slug-hint">Slug cannot be changed after creation.</span>
-                </div>
-              ) : (
-                <div className="bs-slug-input-wrap">
-                  <span className="bs-slug-prefix">/b/</span>
-                  <input
-                    className="bs-input"
-                    type="text"
-                    value={form.slug}
-                    onChange={(e) =>
-                      set("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
-                    }
-                    placeholder="your-business"
-                    required
-                    pattern="[a-z0-9][a-z0-9\-]{1,98}[a-z0-9]"
-                    title="Lowercase letters, numbers and hyphens. Min 3 chars."
-                  />
-                </div>
-              )}
-            </div>
+    <div className="bsetup-shell">
+      <header className="bsetup-header">
+        <div className="bsetup-header-inner">
+          <div className="bsetup-header-left">
+            <Link to="/" className="bsetup-back">← Back</Link>
+            <h1 className="bsetup-page-title">Booking Page</h1>
           </div>
+          <button className="bsetup-logout" onClick={onLogout}>Logout</button>
+        </div>
+      </header>
 
-          {/* Business info */}
-          <div className="bs-section">
-            <h2 className="bs-section-title">Business Info</h2>
-            <div className="bs-grid">
-              <div className="bs-field">
-                <label className="bs-label">Business name <span className="bs-req">*</span></label>
-                <input
-                  className="bs-input"
-                  type="text"
-                  value={form.business_name}
-                  onChange={(e) => set("business_name", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="bs-field">
-                <label className="bs-label">Tagline</label>
-                <input
-                  className="bs-input"
-                  type="text"
-                  value={form.tagline}
-                  onChange={(e) => set("tagline", e.target.value)}
-                  placeholder="e.g. Book your appointment online"
-                />
-              </div>
-              <div className="bs-field">
-                <label className="bs-label">WhatsApp number</label>
-                <input
-                  className="bs-input"
-                  type="tel"
-                  value={form.whatsapp_number}
-                  onChange={(e) => set("whatsapp_number", e.target.value)}
-                  placeholder="+971501234567"
-                />
-              </div>
-              <div className="bs-field">
-                <label className="bs-label">Notification email</label>
-                <input
-                  className="bs-input"
-                  type="email"
-                  value={form.notification_email}
-                  onChange={(e) => set("notification_email", e.target.value)}
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-          </div>
+      <main className="bsetup-main">
+        <div className="bsetup-tabs">
+          <button
+            className={"bsetup-tab" + (tab === "setup" ? " bsetup-tab-active" : "")}
+            onClick={() => setTab("setup")}
+          >Page Setup</button>
+          <button
+            className={"bsetup-tab" + (tab === "submissions" ? " bsetup-tab-active" : "")}
+            onClick={() => setTab("submissions")}
+          >Submissions</button>
+        </div>
 
-          {/* Mode */}
-          <div className="bs-section">
-            <h2 className="bs-section-title">Page Mode</h2>
-            <div className="bs-mode-group">
-              {MODES.map((m) => (
-                <label key={m.value} className={`bs-mode-option ${form.mode === m.value ? "active" : ""}`}>
-                  <input
-                    type="radio"
-                    name="mode"
-                    value={m.value}
-                    checked={form.mode === m.value}
-                    onChange={() => set("mode", m.value)}
-                    className="sr-only"
-                  />
-                  {m.label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="bs-section">
-            <div className="bs-section-header">
-              <h2 className="bs-section-title">Services</h2>
-              <button type="button" className="bs-add-btn" onClick={addService}>
-                + Add service
-              </button>
-            </div>
-            {form.services.length === 0 ? (
-              <p className="bs-empty-hint">No services added. Customers will see a free-text form.</p>
+        {tab === "setup" && (
+          <div className="bsetup-panel">
+            {pageLoading ? (
+              <div className="bsetup-loading">
+                <div className="bsetup-sk bsetup-sk-field" />
+                <div className="bsetup-sk bsetup-sk-field" />
+                <div className="bsetup-sk bsetup-sk-field" />
+              </div>
             ) : (
-              <div className="bs-services-list">
-                <div className="bs-service-header">
-                  <span>Name</span>
-                  <span>Duration (min)</span>
-                  <span>Price</span>
-                  <span />
+              <form className="bsetup-form" onSubmit={handleSave} noValidate>
+                <div className="bsetup-section">
+                  <h2 className="bsetup-section-title">Page identity</h2>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-slug">URL slug <span className="bsetup-required">*</span></label>
+                    <div className="bsetup-slug-row">
+                      <span className="bsetup-slug-prefix">/b/</span>
+                      <input
+                        id="bs-slug"
+                        name="slug"
+                        type="text"
+                        value={form.slug}
+                        onChange={handleChange}
+                        required
+                        placeholder="my-business"
+                        pattern="[a-z0-9-]+"
+                        title="Lowercase letters, numbers, and hyphens only"
+                      />
+                    </div>
+                    {publicUrl && (
+                      <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="bsetup-preview-link">
+                        {publicUrl} ↗
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-title">Heading</label>
+                    <input
+                      id="bs-title"
+                      name="title"
+                      type="text"
+                      value={form.title}
+                      onChange={handleChange}
+                      placeholder="Book a consultation"
+                    />
+                  </div>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-description">Description</label>
+                    <textarea
+                      id="bs-description"
+                      name="description"
+                      value={form.description}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder="Tell customers what they're booking…"
+                    />
+                  </div>
                 </div>
-                {form.services.map((svc, i) => (
-                  <ServiceRow
-                    key={i}
-                    svc={svc}
-                    index={i}
-                    onChange={updateService}
-                    onRemove={removeService}
-                  />
+
+                <div className="bsetup-section">
+                  <h2 className="bsetup-section-title">Form labels</h2>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-cta">Button label</label>
+                    <input
+                      id="bs-cta"
+                      name="cta_label"
+                      type="text"
+                      value={form.cta_label}
+                      onChange={handleChange}
+                      placeholder="Send request"
+                    />
+                  </div>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-msg-label">Message field label</label>
+                    <input
+                      id="bs-msg-label"
+                      name="message_label"
+                      type="text"
+                      value={form.message_label}
+                      onChange={handleChange}
+                      placeholder="Message"
+                    />
+                  </div>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-msg-placeholder">Message placeholder text</label>
+                    <input
+                      id="bs-msg-placeholder"
+                      name="message_placeholder"
+                      type="text"
+                      value={form.message_placeholder}
+                      onChange={handleChange}
+                      placeholder="Tell us what you need…"
+                    />
+                  </div>
+
+                  <div className="bsetup-field">
+                    <label htmlFor="bs-confirm">Confirmation message</label>
+                    <textarea
+                      id="bs-confirm"
+                      name="confirmation_message"
+                      value={form.confirmation_message}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder="Thanks for reaching out. We'll be in touch shortly."
+                    />
+                  </div>
+                </div>
+
+                {saveError && <p className="bsetup-error">{saveError}</p>}
+                {saveSuccess && <p className="bsetup-success">Saved successfully.</p>}
+
+                <div className="bsetup-actions">
+                  <button className="bsetup-save" type="submit" disabled={saving}>
+                    {saving ? "Saving…" : hasPage ? "Update page" : "Create page"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
+
+        {tab === "submissions" && (
+          <div className="bsetup-panel">
+            {subsLoading && (
+              <div className="bsetup-loading">
+                <div className="bsetup-sk bsetup-sk-row" />
+                <div className="bsetup-sk bsetup-sk-row" />
+                <div className="bsetup-sk bsetup-sk-row" />
+              </div>
+            )}
+            {subsError && <p className="bsetup-error">{subsError}</p>}
+            {!subsLoading && !subsError && submissions.length === 0 && (
+              <div className="bsetup-empty">
+                <p className="bsetup-empty-icon">📥</p>
+                <p className="bsetup-empty-title">No submissions yet</p>
+                <p className="bsetup-empty-sub">When customers submit your booking form, they'll appear here.</p>
+              </div>
+            )}
+            {!subsLoading && submissions.length > 0 && (
+              <div className="bsetup-subs-list">
+                {submissions.map(sub => (
+                  <div key={sub.id} className="bsetup-sub-card">
+                    <div
+                      className="bsetup-sub-header"
+                      onClick={() => setExpanded(expanded === sub.id ? null : sub.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={e => e.key === "Enter" && setExpanded(expanded === sub.id ? null : sub.id)}
+                    >
+                      <div className="bsetup-sub-meta">
+                        <span className="bsetup-sub-name">{sub.name || "(no name)"}</span>
+                        <span className="bsetup-sub-email">{sub.email}</span>
+                      </div>
+                      <span className="bsetup-sub-date">
+                        {new Date(sub.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+                      </span>
+                      <span className="bsetup-sub-chevron">{expanded === sub.id ? "▲" : "▼"}</span>
+                    </div>
+                    {expanded === sub.id && (
+                      <div className="bsetup-sub-body">
+                        {sub.phone && <p><strong>Phone:</strong> {sub.phone}</p>}
+                        {sub.message && <p><strong>Message:</strong> {sub.message}</p>}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
           </div>
-
-          {/* Active toggle */}
-          <div className="bs-section bs-section--inline">
-            <h2 className="bs-section-title">Page status</h2>
-            <label className="bs-toggle">
-              <input
-                type="checkbox"
-                checked={form.active}
-                onChange={(e) => set("active", e.target.checked)}
-              />
-              <span className="bs-toggle-track" />
-              <span className="bs-toggle-label">{form.active ? "Active" : "Inactive"}</span>
-            </label>
-          </div>
-
-          {error && <p className="bs-error">{error}</p>}
-          {saved && <p className="bs-saved">&#10003; Saved successfully</p>}
-
-          <div className="bs-actions">
-            <button className="primary" type="submit" disabled={saving}>
-              {saving ? "Saving…" : existing ? "Save changes" : "Create booking page"}
-            </button>
-          </div>
-        </form>
-      )}
+        )}
+      </main>
     </div>
   );
 }

@@ -156,8 +156,7 @@ export const api = {
     const qs = new URLSearchParams(params || {}).toString();
     return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
   },
-  // --- Booking ---
-  // Public — no auth token needed (skipAuth); base URL has no /api/v1 prefix for /b/* routes
+  // Booking — public (no auth)
   getBookingPage: function (slug) {
     return request("/b/" + slug, { skipAuth: true });
   },
@@ -168,19 +167,15 @@ export const api = {
       skipAuth: true,
     });
   },
-  // Authenticated tenant
-  createBookingPage: function (data) {
+  // Booking — tenant-auth
+  createOrUpdateBookingPage: function (data) {
     return request("/booking/page", { method: "POST", body: JSON.stringify(data) });
   },
-  getOwnBookingPage: function () {
+  getBookingPageConfig: function () {
     return request("/booking/page");
   },
-  updateBookingPage: function (data) {
-    return request("/booking/page", { method: "PUT", body: JSON.stringify(data) });
-  },
-  getSubmissions: function (params) {
-    const qs = new URLSearchParams(params || {}).toString();
-    return request("/booking/submissions" + (qs ? "?" + qs : ""));
+  getSubmissions: function () {
+    return request("/booking/submissions");
   },
   getAdminStats: function () { return request("/admin/stats"); },
   getAdminTenants: function () { return request("/admin/tenants"); },

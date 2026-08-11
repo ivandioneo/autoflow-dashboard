@@ -1,84 +1,38 @@
-/**
- * Public customer-facing booking/quote form.
- * Rendered at /b/:slug — no authentication required.
- * Fetches page config from GET /b/{slug} then POSTs to /b/{slug}/submit.
- */
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../api";
 import "./BookingPage.css";
 
-function FieldGroup({ label, required, children }) {
-  return (
-    <div className="bp-field">
-      <label className="bp-label">
-        {label}{required && <span className="bp-required">*</span>}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function StatusBadge({ mode }) {
-  if (mode === "booking") return <span className="bp-mode-badge">Booking</span>;
-  if (mode === "quote") return <span className="bp-mode-badge bp-mode-badge--quote">Quote Request</span>;
-  return null;
-}
-
 export default function BookingPage() {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-
-  const [form, setForm] = useState({
-    submission_type: "booking",
-    customer_name: "",
-    customer_phone: "",
-    customer_email: "",
-    service_requested: "",
-    preferred_date: "",
-    preferred_time: "",
-    message: "",
-  });
+  const [error, setError] = useState(null);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(null);
+  const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
-    api
-      .getBookingPage(slug)
-      .then((data) => {
-        setPage(data);
-        if (data.mode !== "both") {
-          setForm((f) => ({ ...f, submission_type: data.mode }));
-        }
-      })
-      .catch(() => setNotFound(true))
+    api.getBookingPage(slug)
+      .then(setPage)
+      .catch(() => setError("This booking page could not be found."))
       .finally(() => setLoading(false));
   }, [slug]);
 
-  function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
+  function handleChange(e) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
-    setError(null);
+    setSubmitError(null);
     try {
-      const payload = {
-        ...form,
-        customer_email: form.customer_email || undefined,
-        service_requested: form.service_requested || undefined,
-        preferred_date: form.preferred_date || undefined,
-        preferred_time: form.preferred_time || undefined,
-        message: form.message || undefined,
-      };
-      await api.submitBooking(slug, payload);
+      await api.submitBooking(slug, form);
       setSubmitted(true);
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setSubmitError(err.message || "Submission failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -88,21 +42,25 @@ export default function BookingPage() {
     return (
       <div className="bp-shell">
         <div className="bp-card">
-          <div className="bp-skeleton bp-skeleton--title" />
-          <div className="bp-skeleton bp-skeleton--line" />
-          <div className="bp-skeleton bp-skeleton--line" style={{ width: "60%" }} />
+          <div className="bp-skeleton bp-skeleton-title" />
+          <div className="bp-skeleton bp-skeleton-text" />
+          <div className="bp-skeleton bp-skeleton-text bp-skeleton-short" />
+          <div className="bp-skeleton bp-skeleton-field" />
+          <div className="bp-skeleton bp-skeleton-field" />
+          <div className="bp-skeleton bp-skeleton-field" />
+          <div className="bp-skeleton bp-skeleton-btn" />
         </div>
       </div>
     );
   }
 
-  if (notFound) {
+  if (error) {
     return (
       <div className="bp-shell">
-        <div className="bp-card bp-card--center">
-          <span className="bp-empty-icon">&#128683;</span>
+        <div className="bp-card bp-card-error">
+          <div className="bp-error-icon">✕</div>
           <h2>Page not found</h2>
-          <p>This booking page doesn&apos;t exist or is no longer active.</p>
+          <p>{error}</p>
         </div>
       </div>
     );
@@ -111,145 +69,86 @@ export default function BookingPage() {
   if (submitted) {
     return (
       <div className="bp-shell">
-        <div className="bp-card bp-card--center">
-          <span className="bp-success-icon">&#10003;</span>
+        <div className="bp-card bp-card-success">
+          <div className="bp-success-icon">✓</div>
           <h2>Request received!</h2>
-          <p>
-            Thanks, <strong>{form.customer_name}</strong>. We&apos;ll be in touch
-            at <strong>{form.customer_phone}</strong> soon.
-          </p>
+          <p>{page.confirmation_message || "Thanks for reaching out. We'll be in touch shortly."}</p>
         </div>
       </div>
     );
   }
 
-  const showTypeToggle = page.mode === "both";
-
   return (
     <div className="bp-shell">
       <div className="bp-card">
-        <div className="bp-header">
-          <h1 className="bp-business-name">{page.business_name}</h1>
-          {page.tagline && <p className="bp-tagline">{page.tagline}</p>}
-          {!showTypeToggle && <StatusBadge mode={page.mode} />}
-        </div>
+        {page.logo_url && (
+          <img src={page.logo_url} alt={page.business_name} className="bp-logo" />
+        )}
+        <h1 className="bp-title">{page.title || page.business_name}</h1>
+        {page.description && <p className="bp-description">{page.description}</p>}
 
         <form className="bp-form" onSubmit={handleSubmit} noValidate>
-          {showTypeToggle && (
-            <div className="bp-toggle-group">
-              <button
-                type="button"
-                className={`bp-toggle-btn ${form.submission_type === "booking" ? "active" : ""}`}
-                onClick={() => set("submission_type", "booking")}
-              >
-                Book Appointment
-              </button>
-              <button
-                type="button"
-                className={`bp-toggle-btn ${form.submission_type === "quote" ? "active" : ""}`}
-                onClick={() => set("submission_type", "quote")}
-              >
-                Request Quote
-              </button>
-            </div>
-          )}
-
-          <FieldGroup label="Your name" required>
+          <div className="bp-field">
+            <label htmlFor="bp-name">Full name</label>
             <input
-              className="bp-input"
+              id="bp-name"
+              name="name"
               type="text"
-              value={form.customer_name}
-              onChange={(e) => set("customer_name", e.target.value)}
+              value={form.name}
+              onChange={handleChange}
+              required
               placeholder="Jane Smith"
-              required
+              autoComplete="name"
             />
-          </FieldGroup>
+          </div>
 
-          <FieldGroup label="Phone number" required>
+          <div className="bp-field">
+            <label htmlFor="bp-email">Email address</label>
             <input
-              className="bp-input"
-              type="tel"
-              value={form.customer_phone}
-              onChange={(e) => set("customer_phone", e.target.value)}
-              placeholder="+971 50 123 4567"
-              required
-            />
-          </FieldGroup>
-
-          <FieldGroup label="Email (optional)">
-            <input
-              className="bp-input"
+              id="bp-email"
+              name="email"
               type="email"
-              value={form.customer_email}
-              onChange={(e) => set("customer_email", e.target.value)}
+              value={form.email}
+              onChange={handleChange}
+              required
               placeholder="jane@example.com"
+              autoComplete="email"
             />
-          </FieldGroup>
+          </div>
 
-          {page.services && page.services.length > 0 && (
-            <FieldGroup label="Service">
-              <select
-                className="bp-input"
-                value={form.service_requested}
-                onChange={(e) => set("service_requested", e.target.value)}
-              >
-                <option value="">Select a service…</option>
-                {page.services.map((s, i) => (
-                  <option key={i} value={s.name}>
-                    {s.name}
-                    {s.price ? ` — ${s.price}` : ""}
-                    {s.duration_min ? ` (${s.duration_min} min)` : ""}
-                  </option>
-                ))}
-              </select>
-            </FieldGroup>
-          )}
+          <div className="bp-field">
+            <label htmlFor="bp-phone">Phone <span className="bp-optional">(optional)</span></label>
+            <input
+              id="bp-phone"
+              name="phone"
+              type="tel"
+              value={form.phone}
+              onChange={handleChange}
+              placeholder="+1 555 000 0000"
+              autoComplete="tel"
+            />
+          </div>
 
-          {form.submission_type === "booking" && (
-            <div className="bp-row">
-              <FieldGroup label="Preferred date">
-                <input
-                  className="bp-input"
-                  type="date"
-                  value={form.preferred_date}
-                  onChange={(e) => set("preferred_date", e.target.value)}
-                />
-              </FieldGroup>
-              <FieldGroup label="Preferred time">
-                <input
-                  className="bp-input"
-                  type="time"
-                  value={form.preferred_time}
-                  onChange={(e) => set("preferred_time", e.target.value)}
-                />
-              </FieldGroup>
-            </div>
-          )}
-
-          <FieldGroup label={form.submission_type === "quote" ? "Details / scope" : "Message (optional)"}>
+          <div className="bp-field">
+            <label htmlFor="bp-message">{page.message_label || "Message"}</label>
             <textarea
-              className="bp-input bp-textarea"
+              id="bp-message"
+              name="message"
               value={form.message}
-              onChange={(e) => set("message", e.target.value)}
-              placeholder={form.submission_type === "quote" ? "Describe what you need…" : "Any requests or notes…"}
-              rows={3}
+              onChange={handleChange}
+              rows={4}
+              placeholder={page.message_placeholder || "Tell us what you need…"}
             />
-          </FieldGroup>
+          </div>
 
-          {error && <p className="bp-error">{error}</p>}
+          {submitError && <p className="bp-submit-error">{submitError}</p>}
 
-          <button
-            className="bp-submit"
-            type="submit"
-            disabled={submitting || !form.customer_name || !form.customer_phone}
-          >
-            {submitting
-              ? "Sending…"
-              : form.submission_type === "quote"
-              ? "Request Quote"
-              : "Book Now"}
+          <button className="bp-submit" type="submit" disabled={submitting}>
+            {submitting ? "Sending…" : (page.cta_label || "Send request")}
           </button>
         </form>
+
+        <p className="bp-powered">Powered by <strong>AutoFlow</strong></p>
       </div>
     </div>
   );
