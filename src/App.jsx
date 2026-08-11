@@ -73,7 +73,7 @@ export default function App() {
         <Route path="/" element={<ProtectedRoute tenant={tenant}><Templates tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/config/:slug" element={<ProtectedRoute tenant={tenant}><Config tenant={tenant} /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute tenant={tenant}><Settings tenant={tenant} onLogout={handleLogout} onUpdate={handleTenantUpdate} /></ProtectedRoute>} />
-        <Route path="/logs" element={<ProtectedRoute tenant={tenant}><RunHistory tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
+        <Route path="/logs" element={<ProtectedRoute tenant={tenant}><RunHistory tenant={tenant} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute tenant={tenant}><AdminOverview tenant={tenant} onLogout={handleLogout} /></AdminRoute>} />
         <Route path="/admin/tenants/:id" element={<AdminRoute tenant={tenant}><AdminTenantDetail /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
