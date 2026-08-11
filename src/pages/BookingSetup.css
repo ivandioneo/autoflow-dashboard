@@ -1,0 +1,310 @@
+/* BookingSetup — tenant booking page editor */
+
+.bs-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 1.5rem);
+  max-width: 720px;
+}
+
+.bs-section {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-lg, 0.75rem);
+  padding: var(--space-6, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 1rem);
+}
+
+.bs-section--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bs-section-title {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+}
+
+.bs-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4, 1rem);
+}
+
+@media (max-width: 600px) {
+  .bs-grid { grid-template-columns: 1fr; }
+}
+
+.bs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.bs-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #111);
+}
+
+.bs-req {
+  color: #dc2626;
+  margin-left: 0.1rem;
+}
+
+.bs-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: var(--radius-md, 0.5rem);
+  font-size: 0.9375rem;
+  background: var(--color-surface, #fff);
+  color: var(--text-primary, #111);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+  width: 100%;
+}
+
+.bs-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #01696f);
+  box-shadow: 0 0 0 3px oklch(from var(--color-primary, #01696f) l c h / 0.12);
+}
+
+/* Slug */
+.bs-slug-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: var(--radius-md, 0.5rem);
+  overflow: hidden;
+  background: var(--color-surface, #fff);
+}
+
+.bs-slug-prefix {
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  background: var(--surface-offset, #f9fafb);
+  border-right: 1px solid var(--border, #d1d5db);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.bs-slug-input-wrap .bs-input {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.bs-slug-input-wrap .bs-input:focus {
+  box-shadow: none;
+}
+
+.bs-slug-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.bs-slug-locked code {
+  font-family: monospace;
+  font-size: 0.9375rem;
+  background: var(--surface-offset, #f3f4f6);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm, 0.375rem);
+  color: var(--text-primary, #111);
+}
+
+.bs-slug-hint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+/* Mode */
+.bs-mode-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.bs-mode-option {
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid var(--border, #d1d5db);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+  background: var(--color-surface, #fff);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  user-select: none;
+}
+
+.bs-mode-option.active {
+  background: var(--color-primary, #01696f);
+  border-color: var(--color-primary, #01696f);
+  color: #fff;
+}
+
+/* Services */
+.bs-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bs-service-header {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px 32px;
+  gap: 0.5rem;
+  padding: 0 0.25rem;
+}
+
+.bs-service-header span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bs-service-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 110px 32px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bs-input--name { }
+.bs-input--short { }
+
+.bs-remove-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 0.375rem);
+  border: 1px solid var(--border, #e5e7eb);
+  background: transparent;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.bs-remove-btn:hover {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.bs-add-btn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary, #01696f);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.bs-add-btn:hover {
+  color: var(--color-primary-hover, #0c4e54);
+}
+
+.bs-empty-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #9ca3af);
+  margin: 0;
+}
+
+/* Toggle */
+.bs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bs-toggle input { display: none; }
+
+.bs-toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--border, #d1d5db);
+  transition: background 140ms ease;
+  flex-shrink: 0;
+}
+
+.bs-toggle input:checked + .bs-toggle-track {
+  background: var(--color-primary, #01696f);
+}
+
+.bs-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #fff;
+  transition: transform 140ms ease;
+  box-shadow: 0 1px 3px oklch(0.2 0.01 80 / 0.2);
+}
+
+.bs-toggle input:checked ~ .bs-toggle-track::after {
+  transform: translateX(18px);
+}
+
+.bs-toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #111);
+}
+
+/* Actions */
+.bs-actions {
+  padding-bottom: var(--space-8, 2rem);
+}
+
+.bs-error {
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
+.bs-saved {
+  color: #166534;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Loading skeleton */
+.bs-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 480px;
+}
+
+.bs-skeleton--line {
+  height: 1.25rem;
+  width: 100%;
+}
