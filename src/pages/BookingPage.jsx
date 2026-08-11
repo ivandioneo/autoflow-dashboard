@@ -101,6 +101,11 @@ export default function BookingPage() {
           <div className="bp-success-icon">✓</div>
           <h2>Request received!</h2>
           <p>Thanks for reaching out. We&apos;ll be in touch shortly.</p>
+          {form.email && (
+            <p className="bp-success-hint">
+              A confirmation has been sent to <strong>{form.email}</strong>.
+            </p>
+          )}
         </div>
       </div>
     );
@@ -220,7 +225,7 @@ export default function BookingPage() {
             />
           </div>
 
-          {/* Email — optional */}
+          {/* Email — optional, with confirmation hint */}
           <div className="bp-field">
             <label htmlFor="bp-email">
               Email <span className="bp-optional">(optional)</span>
@@ -234,6 +239,9 @@ export default function BookingPage() {
               placeholder="jane@example.com"
               autoComplete="email"
             />
+            <p className="bp-field-hint">
+              Add your email to receive a confirmation of this request.
+            </p>
           </div>
 
           {/* Notes — optional */}
