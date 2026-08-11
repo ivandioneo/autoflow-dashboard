@@ -3,25 +3,41 @@ import { useParams } from "react-router-dom";
 import { api } from "../api";
 import "./BookingPage.css";
 
+const EMPTY_FORM = {
+  submission_type: "booking",
+  service_name: "",
+  preferred_datetime: "",
+  customer_name: "",
+  phone: "",
+  email: "",
+  notes: "",
+};
+
 export default function BookingPage() {
   const { slug } = useParams();
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     api.getBookingPage(slug)
-      .then(setPage)
+      .then((data) => {
+        setPage(data);
+        // Pre-select the first service if only one exists
+        if (data.services && data.services.length === 1) {
+          setForm((prev) => ({ ...prev, service_name: data.services[0].name }));
+        }
+      })
       .catch(() => setError("This booking page could not be found."))
       .finally(() => setLoading(false));
   }, [slug]);
 
   function handleChange(e) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
   async function handleSubmit(e) {
@@ -29,7 +45,16 @@ export default function BookingPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await api.submitBooking(slug, form);
+      const payload = {
+        submission_type: form.submission_type,
+        service_name: form.service_name,
+        preferred_datetime: form.preferred_datetime,
+        customer_name: form.customer_name,
+        phone: form.phone,
+        ...(form.email ? { email: form.email } : {}),
+        ...(form.notes ? { notes: form.notes } : {}),
+      };
+      await api.submitBooking(slug, payload);
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err.message || "Submission failed. Please try again.");
@@ -38,6 +63,7 @@ export default function BookingPage() {
     }
   }
 
+  /* ── Loading skeleton ─────────────────────────────────────────────── */
   if (loading) {
     return (
       <div className="bp-shell">
@@ -54,6 +80,7 @@ export default function BookingPage() {
     );
   }
 
+  /* ── Error ────────────────────────────────────────────────────────── */
   if (error) {
     return (
       <div className="bp-shell">
@@ -66,35 +93,111 @@ export default function BookingPage() {
     );
   }
 
+  /* ── Success ──────────────────────────────────────────────────────── */
   if (submitted) {
     return (
       <div className="bp-shell">
         <div className="bp-card bp-card-success">
           <div className="bp-success-icon">✓</div>
           <h2>Request received!</h2>
-          <p>{page.confirmation_message || "Thanks for reaching out. We'll be in touch shortly."}</p>
+          <p>Thanks for reaching out. We&apos;ll be in touch shortly.</p>
         </div>
       </div>
     );
   }
 
+  const hasServices = page.services && page.services.length > 0;
+
+  /* ── Form ─────────────────────────────────────────────────────────── */
   return (
     <div className="bp-shell">
       <div className="bp-card">
         {page.logo_url && (
           <img src={page.logo_url} alt={page.business_name} className="bp-logo" />
         )}
-        <h1 className="bp-title">{page.title || page.business_name}</h1>
+        <h1 className="bp-title">{page.business_name}</h1>
         {page.description && <p className="bp-description">{page.description}</p>}
 
         <form className="bp-form" onSubmit={handleSubmit} noValidate>
+
+          {/* Submission type toggle */}
+          <div className="bp-field bp-field-toggle">
+            <label>Request type</label>
+            <div className="bp-toggle">
+              <button
+                type="button"
+                className={`bp-toggle-btn${form.submission_type === "booking" ? " active" : ""}`}
+                onClick={() => setForm((p) => ({ ...p, submission_type: "booking" }))}
+              >
+                Book appointment
+              </button>
+              <button
+                type="button"
+                className={`bp-toggle-btn${form.submission_type === "quote" ? " active" : ""}`}
+                onClick={() => setForm((p) => ({ ...p, submission_type: "quote" }))}
+              >
+                Get a quote
+              </button>
+            </div>
+          </div>
+
+          {/* Service */}
+          {hasServices ? (
+            <div className="bp-field">
+              <label htmlFor="bp-service">Service</label>
+              <select
+                id="bp-service"
+                name="service_name"
+                value={form.service_name}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select a service…</option>
+                {page.services.map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name}
+                    {s.duration_minutes ? ` (${s.duration_minutes} min)` : ""}
+                    {s.price_hint ? ` — ${s.price_hint}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="bp-field">
+              <label htmlFor="bp-service">Service / job description</label>
+              <input
+                id="bp-service"
+                name="service_name"
+                type="text"
+                value={form.service_name}
+                onChange={handleChange}
+                required
+                placeholder="e.g. Haircut, Consultation…"
+              />
+            </div>
+          )}
+
+          {/* Preferred date/time */}
+          <div className="bp-field">
+            <label htmlFor="bp-datetime">Preferred date &amp; time</label>
+            <input
+              id="bp-datetime"
+              name="preferred_datetime"
+              type="datetime-local"
+              value={form.preferred_datetime}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {/* Customer name */}
           <div className="bp-field">
             <label htmlFor="bp-name">Full name</label>
             <input
               id="bp-name"
-              name="name"
+              name="customer_name"
               type="text"
-              value={form.name}
+              value={form.customer_name}
               onChange={handleChange}
               required
               placeholder="Jane Smith"
@@ -102,49 +205,56 @@ export default function BookingPage() {
             />
           </div>
 
+          {/* Phone — required */}
           <div className="bp-field">
-            <label htmlFor="bp-email">Email address</label>
-            <input
-              id="bp-email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="jane@example.com"
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="bp-field">
-            <label htmlFor="bp-phone">Phone <span className="bp-optional">(optional)</span></label>
+            <label htmlFor="bp-phone">Phone / WhatsApp</label>
             <input
               id="bp-phone"
               name="phone"
               type="tel"
               value={form.phone}
               onChange={handleChange}
+              required
               placeholder="+1 555 000 0000"
               autoComplete="tel"
             />
           </div>
 
+          {/* Email — optional */}
           <div className="bp-field">
-            <label htmlFor="bp-message">{page.message_label || "Message"}</label>
-            <textarea
-              id="bp-message"
-              name="message"
-              value={form.message}
+            <label htmlFor="bp-email">
+              Email <span className="bp-optional">(optional)</span>
+            </label>
+            <input
+              id="bp-email"
+              name="email"
+              type="email"
+              value={form.email}
               onChange={handleChange}
-              rows={4}
-              placeholder={page.message_placeholder || "Tell us what you need…"}
+              placeholder="jane@example.com"
+              autoComplete="email"
+            />
+          </div>
+
+          {/* Notes — optional */}
+          <div className="bp-field">
+            <label htmlFor="bp-notes">
+              Notes <span className="bp-optional">(optional)</span>
+            </label>
+            <textarea
+              id="bp-notes"
+              name="notes"
+              value={form.notes}
+              onChange={handleChange}
+              rows={3}
+              placeholder="Any details or special requests…"
             />
           </div>
 
           {submitError && <p className="bp-submit-error">{submitError}</p>}
 
           <button className="bp-submit" type="submit" disabled={submitting}>
-            {submitting ? "Sending…" : (page.cta_label || "Send request")}
+            {submitting ? "Sending…" : "Send request"}
           </button>
         </form>
 
