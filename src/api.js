@@ -156,6 +156,27 @@ export const api = {
     const qs = new URLSearchParams(params || {}).toString();
     return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
   },
+  // Booking — public (no auth)
+  getBookingPage: function (slug) {
+    return request("/b/" + slug, { skipAuth: true });
+  },
+  submitBooking: function (slug, data) {
+    return request("/b/" + slug + "/submit", {
+      method: "POST",
+      body: JSON.stringify(data),
+      skipAuth: true,
+    });
+  },
+  // Booking — tenant-auth
+  createOrUpdateBookingPage: function (data) {
+    return request("/booking/page", { method: "POST", body: JSON.stringify(data) });
+  },
+  getBookingPageConfig: function () {
+    return request("/booking/page");
+  },
+  getSubmissions: function () {
+    return request("/booking/submissions");
+  },
   getAdminStats: function () { return request("/admin/stats"); },
   getAdminTenants: function () { return request("/admin/tenants"); },
   getAdminTenant: function (tenantId) { return request("/admin/tenants/" + tenantId); },
