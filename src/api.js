@@ -168,14 +168,25 @@ export const api = {
     });
   },
   // Booking — tenant-auth
+  // POST to create; if 409 (already exists) fall back to PATCH to update.
   createOrUpdateBookingPage: function (data) {
-    return request("/booking/page", { method: "POST", body: JSON.stringify(data) });
+    return request("/booking/page", { method: "POST", body: JSON.stringify(data) })
+      .catch(function (err) {
+        if (err.message && err.message.toLowerCase().includes("already exists")) {
+          return request("/booking/page", { method: "PATCH", body: JSON.stringify(data) });
+        }
+        throw err;
+      });
   },
   getBookingPageConfig: function () {
     return request("/booking/page");
   },
-  getSubmissions: function () {
-    return request("/booking/submissions");
+  getLeads: function (status) {
+    const qs = status ? "?status=" + encodeURIComponent(status) : "";
+    return request("/booking/leads" + qs);
+  },
+  updateLeadStatus: function (leadId, status) {
+    return request("/booking/leads/" + leadId, { method: "PATCH", body: JSON.stringify({ status: status }) });
   },
   getAdminStats: function () { return request("/admin/stats"); },
   getAdminTenants: function () { return request("/admin/tenants"); },
