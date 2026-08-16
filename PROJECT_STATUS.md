@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 17:16 +04  
+**Last updated:** 2026-08-16 17:29 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -67,6 +67,8 @@ Access tokens are **never written to localStorage, sessionStorage, URLs, or logs
 - Dashboard: registration shows a persistent verification-pending notice with a resend flow; `register()` no longer calls `saveAccessToken()`
 - Dashboard: 403 responses surface the API's actual `detail` message instead of the generic fallback
 - Password show/hide toggle added to the login form
+
+**Code audit (2026-08-16):** All layers verified complete in production code — no gaps found. ✅
 
 ### 5. Branded Email Verification Page
 **API commit:** [`7a08cc61`](https://github.com/ivandioneo/autoflow-api/commit/7a08cc6124a4057a92d1c82c454afd1c7e435698)
@@ -135,7 +137,7 @@ Full production smoke test on CT116:
 ### 12. Booking Pages, Services & Leads API
 **API PR #14 → [`512e4e87`](https://github.com/ivandioneo/autoflow-api/commit/512e4e87439dc1e1e143b5ca5b0d4efd69e26941)**  
 **API fix → [`c6ec171a`](https://github.com/ivandioneo/autoflow-api/commit/c6ec171a1c61ea9e0ed2c07aa937f8fd8eca7655)**  
-**Dashboard → [`a425538c`](https://github.com/ivandioneo/autoflow-dashboard/commit/a425538c52bc5d101141b08fb6422de1fb16edba) · [`99c944ff`](https://github.com/ivandioneo/autoflow-dashboard/commit/99c944ff3c84f3b1ee366d4d2c0f806bd61f76f4) · [`ebc8be05`](https://github.com/ivandioneo/autoflow-dashboard/commit/ebc8be0597f43d8106f91d527f97747d65d5e97c) · [`ad6831ae`](https://github.com/ivandioneo/autoflow-dashboard/commit/ad6831ae2ebbd096d3fa6f2bba672434d17d7e43)**  
+**Dashboard → [`a425538c`](https://github.com/ivandioneo/autoflow-dashboard/commit/a425538c52bc5d101141b08fb6422de1fb16ebda) · [`99c944ff`](https://github.com/ivandioneo/autoflow-dashboard/commit/99c944ff3c84f3b1ee366d4d2c0f806bd61f76f4) · [`ebc8be05`](https://github.com/ivandioneo/autoflow-dashboard/commit/ebc8be0597f43d8106f91d527f97747d65d5e97c) · [`ad6831ae`](https://github.com/ivandioneo/autoflow-dashboard/commit/ad6831ae2ebbd096d3fa6f2bba672434d17d7e43)**  
 **Date:** 2026-08-11
 
 Each tenant can create a hosted public booking/quote page at `/b/{slug}` with its own service catalogue and lead inbox.
@@ -218,7 +220,7 @@ Full run history UI is live at `/logs` (protected route).
 ## In Progress
 
 ### 15. HTTP Request Node — Dashboard UI
-**Status:** Planning complete (2026-08-16). Branch and PR not yet opened.
+**Status:** Planning complete (2026-08-16). Confirmed scope. Ready to branch.
 
 **API side is fully implemented (no changes required):**
 - `app/engine/http_request.py` — `HttpRequestExecutor` with URL, method, headers, `body_template` (`{{key}}` interpolation), httpx async execution, JSON validation
@@ -234,13 +236,13 @@ Full run history UI is live at `/logs` (protected route).
 | `src/pages/HttpRequest.css` | Create | Page styles |
 | `src/api.js` | Patch | Add `createConfig`, `updateConfig`, `triggerAutomation` helpers if missing |
 | `src/App.jsx` | Patch | Add `/integrations/http` route |
-| Sidebar component | Patch | Add "HTTP Request" nav link under Integrations section (new section) |
+| Sidebar component | Patch | Add "HTTP Request" nav link under new Integrations section |
 
 **Form fields:** template name/slug, destination URL, HTTP method (GET/POST/PUT/PATCH/DELETE), extra headers (key-value editor), body template (textarea, supports `{{key}}`), enabled toggle.
 
 **Test panel:** sample payload JSON input → calls `POST /engine/trigger/{slug}` → shows response status + body inline.
 
-**Confirmed scope:** Create **and** edit existing configs. This is the **first** Integrations section in the sidebar (new section to be added).
+**Confirmed scope:** Create **and** edit existing configs. First Integrations section in the sidebar (new section).
 
 ---
 
@@ -263,6 +265,7 @@ Full run history UI is live at `/logs` (protected route).
 - [x] Engine trigger pipeline: `http_request:test-echo` → 200 OK end-to-end ✅
 - [x] Settings Developer section: API key masked, Show/Copy functional ✅
 - [x] Unverified login → Resend button functional and sends email ✅ *(verified 2026-08-16)*
+- [x] Email verification enforcement: all layers audited complete in production code ✅ *(verified 2026-08-16)*
 - [ ] Run History `/logs` page: loads, filters, and expands log rows *(pending browser verification)*
 - [ ] Booking page public form: lead submission → business notification email *(pending re-verify post-fix)*
 - [ ] Booking page public form: customer confirmation email *(pending re-verify post-fix)*
@@ -273,7 +276,7 @@ Full run history UI is live at `/logs` (protected route).
 
 | Priority | Feature | Notes |
 |----------|---------|-------|
-| 🔴 High | **HTTP Request node dashboard UI** | Planning complete — ready to branch. `src/pages/HttpRequest.jsx`, new Integrations sidebar section, create + edit + test panel |
+| 🔴 High | **HTTP Request node dashboard UI** | Ready to branch — `src/pages/HttpRequest.jsx`, new Integrations sidebar section, create + edit + test panel |
 | 🟡 Medium | Audit log UI (admin panel) | Surface `auth.*` audit events in the admin dashboard |
 | 🟡 Medium | Booking page production smoke test | Verify lead submission, business notification email, and customer confirmation email post-fix |
 | 🟡 Medium | E2E test suite (Playwright) | Cover login, hard refresh, logout, email verification, password reset, run history |
