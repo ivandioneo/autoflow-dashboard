@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 22:21 +04  
+**Last updated:** 2026-08-16 22:25 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -202,6 +202,19 @@ Access tokens are **never written to localStorage, sessionStorage, URLs, or logs
 | Sign out → `/login`; hard refresh stays on `/login` | ✅ |
 | `autoflow_refresh` cookie cleared on logout | ✅ |
 
+### 16. Admin Audit Log UI — Security Events Tab
+**Dashboard:** [`AdminOverview.jsx`](https://github.com/ivandioneo/autoflow-dashboard/blob/main/src/pages/AdminOverview.jsx)  
+**API:** [`app/routers/admin.py`](https://github.com/ivandioneo/autoflow-api/blob/main/app/routers/admin.py) — `GET /admin/audit`
+
+- Audit log is embedded as the **"Security events" tab** inside the `/admin` overview page
+- All four admin data sources fetched in parallel on load: `stats`, `tenants`, `activity`, `audit`
+- Each audit event renders: action label, details (key: value pairs), IP address, relative timestamp
+- Failed/error events shown with red dot; successful events with green dot
+- Tab toggle between "Automation runs" and "Security events" with no additional navigation
+- `api.getAdminAudit()` in `api.js` calls `GET /admin/audit` with session auth
+
+**Code audit (2026-08-16):** Fully implemented across API and dashboard — no separate page needed. ✅
+
 ---
 
 ## Pending Verification
@@ -215,7 +228,7 @@ None. All shipped features are production-verified. ✅
 | Repo | Branch | HEAD Commit |
 |------|--------|-------------|
 | `autoflow-api` | `main` | `cbc398da` — docs: NOTES.md HTTP request node UI planning |
-| `autoflow-dashboard` | `main` | `7315d472` — security: Cloudflare Pages `_headers` |
+| `autoflow-dashboard` | `main` | `77d73dbc` — docs: PROJECT_STATUS.md full smoke test results |
 
 ---
 
@@ -223,6 +236,6 @@ None. All shipped features are production-verified. ✅
 
 | Priority | Item | Notes |
 |----------|------|-------|
-| 🔴 High | **Audit log UI** | `api.getAdminAudit()` already wired in `api.js` → `/admin/audit`. Needs `AdminAudit.jsx` page + route + admin sidebar link. Surface `auth.*` events in a filterable table. |
-| 🟡 Medium | E2E test suite (Playwright) | Login, refresh, logout, email verification, password reset, run history, HTTP Request config + test |
-| 🟢 Low | Resend-verification hardening | Per-email daily cap (currently only per-minute rate limit) |
+| 🔴 High | **Playwright E2E test suite** | Cover: login, hard refresh/session restore, logout, email verification flow, password reset, run history filters, HTTP Request config + test panel, booking public form submission |
+| 🟡 Medium | **Resend-verification hardening** | Add per-email daily cap (currently only 3/min rate limit) in `POST /auth/resend-verification` |
+| 🟢 Low | **Multi-tenant plan enforcement** | Usage limits per plan tier (e.g. max automations, max runs/month) |
