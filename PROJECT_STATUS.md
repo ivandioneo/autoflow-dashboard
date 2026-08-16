@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 17:29 +04  
+**Last updated:** 2026-08-16 18:22 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -145,7 +145,7 @@ Each tenant can create a hosted public booking/quote page at `/b/{slug}` with it
 **New models (`app/models.py`):**
 
 | Model | Table | Purpose |
-|-------|-------|---------|
+|-------|-------|---------| 
 | `BookingPage` | `booking_pages` | One per tenant; slug globally unique; stores business name, description, enabled flag, notify email |
 | `BookingService` | `booking_services` | Services on the page; name, duration, price hint, active flag, sort order |
 | `BookingLead` | `booking_leads` | Submitted leads; type (booking/quote), service, preferred datetime, name, phone, optional email and notes, status |
@@ -215,34 +215,24 @@ Full run history UI is live at `/logs` (protected route).
 
 **`src/api.js`:** `getLogs(tenantId, params)` builds query string and calls the logs endpoint.
 
----
-
-## In Progress
-
 ### 15. HTTP Request Node — Dashboard UI
-**Status:** Planning complete (2026-08-16). Confirmed scope. Ready to branch.
+**Dashboard files:** `src/pages/HttpRequest.jsx` · `src/pages/HttpRequest.css` · `src/App.jsx` (route) · Sidebar (nav link)  
+**Date:** 2026-08-16
 
-**API side is fully implemented (no changes required):**
-- `app/engine/http_request.py` — `HttpRequestExecutor` with URL, method, headers, `body_template` (`{{key}}` interpolation), httpx async execution, JSON validation
-- `app/engine/registry.py` — `http_request:` prefix routing maps to `HttpRequestExecutor`
-- `GET /engine/config/{template_slug}` — live; resolves tenant config by API key
-- `POST /engine/trigger/{template_slug}` — live; runs executor directly
+Full HTTP Request integration UI live at `/integrations/http`.
 
-**Dashboard work required:**
+**Features:**
+- Create and edit `http_request:*` tenant configs
+- Form fields: template name/slug, destination URL, HTTP method (GET/POST/PUT/PATCH/DELETE), custom headers (key-value editor), body template (textarea with `{{key}}` placeholder support), enabled toggle
+- **Inline test panel:** sample JSON payload → `POST /engine/trigger/{slug}` → response status + body displayed inline
+- New **Integrations** section in the sidebar nav
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/pages/HttpRequest.jsx` | Create | Form to create/edit `http_request:*` tenant configs + inline test panel |
-| `src/pages/HttpRequest.css` | Create | Page styles |
-| `src/api.js` | Patch | Add `createConfig`, `updateConfig`, `triggerAutomation` helpers if missing |
-| `src/App.jsx` | Patch | Add `/integrations/http` route |
-| Sidebar component | Patch | Add "HTTP Request" nav link under new Integrations section |
-
-**Form fields:** template name/slug, destination URL, HTTP method (GET/POST/PUT/PATCH/DELETE), extra headers (key-value editor), body template (textarea, supports `{{key}}`), enabled toggle.
-
-**Test panel:** sample payload JSON input → calls `POST /engine/trigger/{slug}` → shows response status + body inline.
-
-**Confirmed scope:** Create **and** edit existing configs. First Integrations section in the sidebar (new section).
+**Production verified (2026-08-16 18:22 +04):**
+- Dashboard UI loads at `/integrations/http` ✅
+- Custom headers sent correctly — `"Here": "Test"` confirmed in httpbin response ✅
+- Outbound HTTPS from CT116 container confirmed — origin IP `94.206.108.61` ✅
+- `{{key}}` body interpolation works end-to-end ✅
+- Test panel returns HTTP 200 with full JSON response inline ✅
 
 ---
 
@@ -266,6 +256,7 @@ Full run history UI is live at `/logs` (protected route).
 - [x] Settings Developer section: API key masked, Show/Copy functional ✅
 - [x] Unverified login → Resend button functional and sends email ✅ *(verified 2026-08-16)*
 - [x] Email verification enforcement: all layers audited complete in production code ✅ *(verified 2026-08-16)*
+- [x] HTTP Request node dashboard UI: create/edit/test panel → HTTP 200 end-to-end ✅ *(verified 2026-08-16)*
 - [ ] Run History `/logs` page: loads, filters, and expands log rows *(pending browser verification)*
 - [ ] Booking page public form: lead submission → business notification email *(pending re-verify post-fix)*
 - [ ] Booking page public form: customer confirmation email *(pending re-verify post-fix)*
@@ -276,10 +267,10 @@ Full run history UI is live at `/logs` (protected route).
 
 | Priority | Feature | Notes |
 |----------|---------|-------|
-| 🔴 High | **HTTP Request node dashboard UI** | Ready to branch — `src/pages/HttpRequest.jsx`, new Integrations sidebar section, create + edit + test panel |
+| 🔴 High | **Run History `/logs` browser verification** | Load page, filter by status, expand a log row |
+| 🔴 High | **Booking page smoke test** | Verify lead submission + business/customer emails post-fix |
 | 🟡 Medium | Audit log UI (admin panel) | Surface `auth.*` audit events in the admin dashboard |
-| 🟡 Medium | Booking page production smoke test | Verify lead submission, business notification email, and customer confirmation email post-fix |
-| 🟡 Medium | E2E test suite (Playwright) | Cover login, hard refresh, logout, email verification, password reset, run history |
+| 🟡 Medium | E2E test suite (Playwright) | Cover login, hard refresh, logout, email verification, password reset, run history, HTTP Request node |
 | 🟢 Low | Resend-verification further hardening | Consider per-email daily cap in addition to per-minute rate limit |
 
 ---
@@ -320,7 +311,7 @@ Full run history UI is live at `/logs` (protected route).
 | File | Purpose |
 |------|---------|
 | `src/api.js` | Fetch wrapper, token management, all API helpers incl. `getLogs()` |
-| `src/App.jsx` | App shell, session restore on load, routing (incl. `/logs` → `RunHistory`) |
+| `src/App.jsx` | App shell, session restore on load, routing (incl. `/logs` → `RunHistory`, `/integrations/http` → `HttpRequest`) |
 | `src/pages/Login.jsx` | Login form, registration form, verify-pending state, resend flow |
 | `src/pages/ForgotPassword.jsx` | Self-service forgot-password form |
 | `src/pages/ResetPassword.jsx` | Token-based password reset form |
@@ -329,6 +320,6 @@ Full run history UI is live at `/logs` (protected route).
 | `src/pages/BookingSetup.jsx` | Booking page/services/leads management UI at `/booking` |
 | `src/pages/BookingPage.jsx` | Public-facing booking/quote form at `/b/:slug` |
 | `src/pages/Settings.jsx` | Account settings + Developer API key section |
-| `src/pages/HttpRequest.jsx` | *(planned)* HTTP Request node config + test panel at `/integrations/http` |
-| `src/pages/HttpRequest.css` | *(planned)* Styles for HTTP Request page |
+| `src/pages/HttpRequest.jsx` | HTTP Request node config create/edit + inline test panel at `/integrations/http` |
+| `src/pages/HttpRequest.css` | Styles for HTTP Request page |
 | `public/_headers` | Cloudflare Pages security headers (HSTS, CSP, X-Frame-Options) |
