@@ -4,63 +4,125 @@ import { api } from "../api";
 import "./HttpRequest.css";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+const SLUG_PREFIX = "http_request";
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
 
 function emptyRow() {
   return { key: "", value: "" };
 }
 
+function makeEditorState(cfg) {
+  if (!cfg) {
+    return {
+      configId: null,
+      name: "",
+      enabled: false,
+      url: "",
+      method: "POST",
+      headerRows: [emptyRow()],
+      bodyTemplate: "",
+    };
+  }
+  const c = cfg.config || {};
+  const hdrs = c.headers || {};
+  const rows = Object.entries(hdrs).map(([k, v]) => ({ key: k, value: v }));
+  const slugSuffix = (cfg.template_slug || "").replace(/^http_request:/, "");
+  return {
+    configId: cfg.id,
+    name: slugSuffix,
+    enabled: cfg.enabled,
+    url: c.url || "",
+    method: c.method || "POST",
+    headerRows: rows.length ? rows : [emptyRow()],
+    bodyTemplate: c.body_template || "",
+  };
+}
+
 export default function HttpRequest({ tenant }) {
   const navigate = useNavigate();
 
-  // --- config state ---
-  const [configId, setConfigId] = useState(null);
+  // list
+  const [endpoints, setEndpoints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // editor panel
+  const [editing, setEditing] = useState(null); // null = list view
+  const [name, setName] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [url, setUrl] = useState("");
   const [method, setMethod] = useState("POST");
   const [headerRows, setHeaderRows] = useState([emptyRow()]);
   const [bodyTemplate, setBodyTemplate] = useState("");
 
-  // --- save state ---
-  const [loading, setLoading] = useState(true);
+  // save state
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [nameError, setNameError] = useState("");
 
-  // --- test panel state ---
+  // test panel
   const [testPayload, setTestPayload] = useState("{}");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [testError, setTestError] = useState("");
   const [payloadError, setPayloadError] = useState("");
 
-  const SLUG = "http_request:default";
-
   useEffect(() => {
-    loadConfig();
+    loadEndpoints();
   }, []);
 
-  async function loadConfig() {
+  async function loadEndpoints() {
+    setLoading(true);
     try {
       const configs = await api.getConfigs(tenant.id);
-      const existing = configs.find(
-        (c) => c.template_slug === SLUG || (c.template && c.template.slug === SLUG)
+      const http = configs.filter((c) =>
+        (c.template_slug || "").startsWith(SLUG_PREFIX + ":")
       );
-      if (existing) {
-        setConfigId(existing.id);
-        setEnabled(existing.enabled);
-        const cfg = existing.config || {};
-        setUrl(cfg.url || "");
-        setMethod(cfg.method || "POST");
-        setBodyTemplate(cfg.body_template || "");
-        const hdrs = cfg.headers || {};
-        const rows = Object.entries(hdrs).map(([k, v]) => ({ key: k, value: v }));
-        setHeaderRows(rows.length ? rows : [emptyRow()]);
-      }
+      setEndpoints(http);
     } catch (err) {
-      console.error("Failed to load HTTP Request config:", err);
+      console.error("Failed to load HTTP configs:", err);
     } finally {
       setLoading(false);
     }
+  }
+
+  function openNew() {
+    const s = makeEditorState(null);
+    applyEditorState(s);
+    setEditing("new");
+    resetTest();
+  }
+
+  function openExisting(cfg) {
+    const s = makeEditorState(cfg);
+    applyEditorState(s);
+    setEditing(cfg.id);
+    resetTest();
+  }
+
+  function applyEditorState(s) {
+    setName(s.name);
+    setEnabled(s.enabled);
+    setUrl(s.url);
+    setMethod(s.method);
+    setHeaderRows(s.headerRows);
+    setBodyTemplate(s.bodyTemplate);
+    setSaved(false);
+    setSaveError("");
+    setNameError("");
+  }
+
+  function resetTest() {
+    setTestPayload("{}");
+    setTesting(false);
+    setTestResult(null);
+    setTestError("");
+    setPayloadError("");
+  }
+
+  function closeEditor() {
+    setEditing(null);
+    resetTest();
   }
 
   function buildConfig() {
@@ -76,21 +138,48 @@ export default function HttpRequest({ tenant }) {
     };
   }
 
+  function validateName() {
+    const trimmed = name.trim();
+    if (!trimmed) { setNameError("Name is required"); return false; }
+    if (!SLUG_RE.test(trimmed)) {
+      setNameError("Lowercase letters, numbers, and hyphens only (must start with a letter or number)");
+      return false;
+    }
+    // check duplicate (only on new)
+    if (editing === "new") {
+      const slug = `${SLUG_PREFIX}:${trimmed}`;
+      const dup = endpoints.find((e) => e.template_slug === slug);
+      if (dup) { setNameError(`An endpoint named "${trimmed}" already exists`); return false; }
+    }
+    setNameError("");
+    return true;
+  }
+
   async function handleSave() {
+    if (!validateName()) return;
     setSaving(true);
     setSaved(false);
     setSaveError("");
     try {
       const config = buildConfig();
-      if (configId) {
-        await api.updateConfig(tenant.id, configId, { enabled, config });
+      const slug = `${SLUG_PREFIX}:${name.trim()}`;
+      if (editing !== "new") {
+        await api.updateConfig(tenant.id, editing, { enabled, config });
+        setEndpoints((prev) =>
+          prev.map((e) =>
+            e.id === editing
+              ? { ...e, enabled, config, template_slug: slug }
+              : e
+          )
+        );
       } else {
         const result = await api.createConfig(tenant.id, {
-          template_slug: SLUG,
+          template_slug: slug,
           enabled,
           config,
         });
-        setConfigId(result.id);
+        setEndpoints((prev) => [...prev, result]);
+        setEditing(result.id);
       }
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -105,7 +194,6 @@ export default function HttpRequest({ tenant }) {
     setPayloadError("");
     setTestError("");
     setTestResult(null);
-
     let parsed;
     try {
       parsed = JSON.parse(testPayload);
@@ -113,10 +201,10 @@ export default function HttpRequest({ tenant }) {
       setPayloadError("Payload must be valid JSON");
       return;
     }
-
+    const slug = `${SLUG_PREFIX}:${name.trim()}`;
     setTesting(true);
     try {
-      const result = await api.triggerEngine(SLUG, tenant.api_key, parsed);
+      const result = await api.triggerEngine(slug, tenant.api_key, parsed);
       setTestResult(result);
     } catch (err) {
       setTestError(err.message || "Request failed");
@@ -141,25 +229,83 @@ export default function HttpRequest({ tenant }) {
     setHeaderRows((prev) => prev.filter((_, i) => i !== index));
   }
 
-  if (loading) {
+  // ── LIST VIEW ────────────────────────────────────────────────────
+  if (!editing) {
     return (
       <div className="page-container">
-        <p style={{ color: "var(--text-secondary)" }}>Loading...</p>
+        <button className="ghost back-btn" onClick={() => navigate("/")}>
+          &larr; Back
+        </button>
+
+        <div className="config-header">
+          <div>
+            <h1>HTTP Request</h1>
+            <p className="subtitle">Outbound HTTP endpoints for your automations</p>
+          </div>
+          <button className="primary" onClick={openNew}>+ New endpoint</button>
+        </div>
+
+        {loading ? (
+          <p style={{ color: "var(--text-secondary)", marginTop: 24 }}>Loading...</p>
+        ) : endpoints.length === 0 ? (
+          <div className="http-empty">
+            <div className="http-empty-icon">🔗</div>
+            <h3>No endpoints yet</h3>
+            <p>Create your first HTTP Request endpoint to trigger outbound webhooks from your automations.</p>
+            <button className="primary" onClick={openNew}>+ New endpoint</button>
+          </div>
+        ) : (
+          <div className="endpoint-list">
+            {endpoints.map((cfg) => {
+              const suffix = (cfg.template_slug || "").replace(/^http_request:/, "");
+              const cfgData = cfg.config || {};
+              return (
+                <div
+                  key={cfg.id}
+                  className="endpoint-card"
+                  onClick={() => openExisting(cfg)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && openExisting(cfg)}
+                >
+                  <div className="endpoint-card-left">
+                    <div className="endpoint-name">{suffix}</div>
+                    <div className="endpoint-meta">
+                      <span className={`method-badge method-${(cfgData.method || "POST").toLowerCase()}`}>
+                        {cfgData.method || "POST"}
+                      </span>
+                      <span className="endpoint-url">{cfgData.url || <em>No URL set</em>}</span>
+                    </div>
+                  </div>
+                  <div className="endpoint-card-right">
+                    <span className={`status-pill ${cfg.enabled ? "on" : "off"}`}>
+                      {cfg.enabled ? "Enabled" : "Disabled"}
+                    </span>
+                    <span className="endpoint-arrow">›</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   }
 
+  // ── EDITOR VIEW ──────────────────────────────────────────────────
+  const isNew = editing === "new";
+  const fullSlug = name.trim() ? `${SLUG_PREFIX}:${name.trim()}` : `${SLUG_PREFIX}:…`;
+
   return (
     <div className="page-container">
-      <button className="ghost back-btn" onClick={() => navigate("/")}>
-        &larr; Back
+      <button className="ghost back-btn" onClick={closeEditor}>
+        &larr; All endpoints
       </button>
 
-      {/* Header */}
       <div className="config-header">
         <div>
-          <h1>HTTP Request</h1>
-          <p className="subtitle">Trigger an outbound HTTP request from your automations</p>
+          <h1>{isNew ? "New endpoint" : name}</h1>
+          <p className="subtitle endpoint-slug-preview">{fullSlug}</p>
         </div>
         <div className="enable-toggle">
           <span className="toggle-label">{enabled ? "Enabled" : "Disabled"}</span>
@@ -176,7 +322,27 @@ export default function HttpRequest({ tenant }) {
         </div>
       </div>
 
-      {/* Request config */}
+      {/* Name */}
+      <div className="config-section">
+        <h2>Endpoint name</h2>
+        <p className="section-hint">
+          Sets the slug suffix: <code>{fullSlug}</code>. Lowercase letters, numbers, hyphens.
+          {!isNew && " Name cannot be changed after creation."}
+        </p>
+        <div className="field">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setNameError(""); }}
+            placeholder="e.g. crm, slack, notify"
+            disabled={!isNew}
+            className={nameError ? "input-error" : ""}
+          />
+          {nameError && <p className="field-error">{nameError}</p>}
+        </div>
+      </div>
+
+      {/* Request */}
       <div className="config-section">
         <h2>Request</h2>
         <div className="section-fields">
@@ -184,9 +350,7 @@ export default function HttpRequest({ tenant }) {
             <div className="field method-field">
               <label>Method</label>
               <select value={method} onChange={(e) => setMethod(e.target.value)}>
-                {METHODS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
+                {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div className="field url-field">
@@ -245,7 +409,7 @@ export default function HttpRequest({ tenant }) {
           className="body-textarea"
           value={bodyTemplate}
           onChange={(e) => setBodyTemplate(e.target.value)}
-          placeholder={'{ "name": "{{customer_name}}", "amount": "{{amount}}" }'}
+          placeholder={'{"name": "{{customer_name}}", "amount": "{{amount}}"}' }
           rows={6}
           spellCheck={false}
         />
@@ -282,7 +446,7 @@ export default function HttpRequest({ tenant }) {
         <button
           className="secondary test-btn"
           onClick={handleTest}
-          disabled={testing || !url.trim()}
+          disabled={testing || !url.trim() || !name.trim()}
         >
           {testing ? "Sending..." : "Send test request"}
         </button>
@@ -297,9 +461,7 @@ export default function HttpRequest({ tenant }) {
         {testResult && (
           <div className={`test-result ${testResult.result?.status_code && testResult.result.status_code < 300 ? "success" : "warn"}`}>
             <span className="result-label">
-              {testResult.result?.status_code
-                ? `HTTP ${testResult.result.status_code}`
-                : "Response"}
+              {testResult.result?.status_code ? `HTTP ${testResult.result.status_code}` : "Response"}
             </span>
             <pre>{JSON.stringify(testResult.result?.body ?? testResult, null, 2)}</pre>
           </div>
