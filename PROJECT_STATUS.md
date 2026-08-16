@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 16:48 +04  
+**Last updated:** 2026-08-16 17:16 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -129,7 +129,8 @@ Full production smoke test on CT116:
 - Logging in with an unverified account shows the "Check your inbox" screen with a Resend button
 - Removed 3 dead `localStorage.removeItem` calls from `clearSession()` in `api.js`
 
-**Production tested:** 2026-08-09 22:04 +04 — all checks passed ✅
+**Production tested:** 2026-08-09 22:04 +04 — all checks passed ✅  
+**Resend button production verified:** 2026-08-16 17:16 +04 ✅
 
 ### 12. Booking Pages, Services & Leads API
 **API PR #14 → [`512e4e87`](https://github.com/ivandioneo/autoflow-api/commit/512e4e87439dc1e1e143b5ca5b0d4efd69e26941)**  
@@ -233,7 +234,7 @@ Full run history UI is live at `/logs` (protected route).
 | `src/pages/HttpRequest.css` | Create | Page styles |
 | `src/api.js` | Patch | Add `createConfig`, `updateConfig`, `triggerAutomation` helpers if missing |
 | `src/App.jsx` | Patch | Add `/integrations/http` route |
-| Sidebar component | Patch | Add "HTTP Request" nav link under Integrations section |
+| Sidebar component | Patch | Add "HTTP Request" nav link under Integrations section (new section) |
 
 **Form fields:** template name/slug, destination URL, HTTP method (GET/POST/PUT/PATCH/DELETE), extra headers (key-value editor), body template (textarea, supports `{{key}}`), enabled toggle.
 
@@ -261,6 +262,7 @@ Full run history UI is live at `/logs` (protected route).
 - [x] Logout clears session; subsequent refresh stays on `/login`
 - [x] Engine trigger pipeline: `http_request:test-echo` → 200 OK end-to-end ✅
 - [x] Settings Developer section: API key masked, Show/Copy functional ✅
+- [x] Unverified login → Resend button functional and sends email ✅ *(verified 2026-08-16)*
 - [ ] Run History `/logs` page: loads, filters, and expands log rows *(pending browser verification)*
 - [ ] Booking page public form: lead submission → business notification email *(pending re-verify post-fix)*
 - [ ] Booking page public form: customer confirmation email *(pending re-verify post-fix)*
