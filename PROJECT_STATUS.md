@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 22:25 +04  
+**Last updated:** 2026-08-16 22:57 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -101,10 +101,10 @@ Access tokens are **never written to localStorage, sessionStorage, URLs, or logs
 - Update merges by decrypting existing values first, merging plaintext, then re-encrypting
 - Existing plaintext rows remain readable via Fernet fallback until next save (graceful migration)
 
-### 8. Resend-Verification Rate Limit
+### 8. Resend-Verification Rate Limit (IP-based)
 **API commit:** [`1107e2e3`](https://github.com/ivandioneo/autoflow-api/commit/1107e2e38b6d9492d7b51e9aacc3080c87b416ab)
 
-- `POST /auth/resend-verification` rate-limited to **3 requests/minute**
+- `POST /auth/resend-verification` rate-limited to **3 requests/minute per IP**
 
 ### 9. Developer Section & API Key in Settings
 **Dashboard commit:** [`d87a2e78`](https://github.com/ivandioneo/autoflow-dashboard/commit/d87a2e782aab3c0c8abaaa4437bf28a58c4e9e52)
@@ -215,6 +215,19 @@ Access tokens are **never written to localStorage, sessionStorage, URLs, or logs
 
 **Code audit (2026-08-16):** Fully implemented across API and dashboard — no separate page needed. ✅
 
+### 17. Per-Email 24h Resend-Verification Cooldown
+**API PR #19 → [`3acec82e`](https://github.com/ivandioneo/autoflow-api/commit/3acec82e9982c6e8cea2d88da1da6c0de7e80cda)**
+
+- `verification_resent_at` column added to `tenants` table (nullable `TIMESTAMPTZ`)
+- `POST /auth/resend-verification` now enforces a **24-hour per-email cooldown** in addition to the existing 3/min IP rate limit
+- First resend stamps `verification_resent_at = now()`; subsequent resends within 24h return HTTP **429** with a human-readable countdown: _"Verification email already sent. You can request another in Xh Ym."_
+- Already-verified accounts return HTTP 200 immediately — no cooldown applies
+- `alembic==1.13.3` added to `requirements.txt` (was missing; future migrations now work via `docker compose exec autoflow-api alembic upgrade head`)
+- Column applied to production DB via direct SQLAlchemy migration on 2026-08-16
+
+**Production verified 2026-08-16 22:56 +04:**
+- Second resend attempt → dashboard shows "Verification email already sent. You can request another in 23h 59m." ✅
+
 ---
 
 ## Pending Verification
@@ -227,7 +240,7 @@ None. All shipped features are production-verified. ✅
 
 | Repo | Branch | HEAD Commit |
 |------|--------|-------------|
-| `autoflow-api` | `main` | `cbc398da` — docs: NOTES.md HTTP request node UI planning |
+| `autoflow-api` | `main` | [`3acec82e`](https://github.com/ivandioneo/autoflow-api/commit/3acec82e9982c6e8cea2d88da1da6c0de7e80cda) — feat: per-email 24h resend-verification cooldown + add alembic to requirements |
 | `autoflow-dashboard` | `main` | `77d73dbc` — docs: PROJECT_STATUS.md full smoke test results |
 
 ---
@@ -237,5 +250,5 @@ None. All shipped features are production-verified. ✅
 | Priority | Item | Notes |
 |----------|------|-------|
 | 🔴 High | **Playwright E2E test suite** | Cover: login, hard refresh/session restore, logout, email verification flow, password reset, run history filters, HTTP Request config + test panel, booking public form submission |
-| 🟡 Medium | **Resend-verification hardening** | Add per-email daily cap (currently only 3/min rate limit) in `POST /auth/resend-verification` |
+| 🟡 Medium | **Multi-node automation builder** | Visual pipeline editor — chain HTTP Request, delay, condition, and notify nodes |
 | 🟢 Low | **Multi-tenant plan enforcement** | Usage limits per plan tier (e.g. max automations, max runs/month) |
