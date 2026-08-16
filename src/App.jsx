@@ -11,6 +11,8 @@ import RunHistory from "./pages/RunHistory";
 import BookingPage from "./pages/BookingPage";
 import BookingSetup from "./pages/BookingSetup";
 import HttpRequest from "./pages/HttpRequest";
+import EmailSend from "./pages/EmailSend";
+import WebhookSend from "./pages/WebhookSend";
 import AdminOverview from "./pages/AdminOverview";
 import AdminTenantDetail from "./pages/AdminTenantDetail";
 import AdminRoute from "./components/AdminRoute";
@@ -81,6 +83,8 @@ export default function App() {
         <Route path="/logs" element={<ProtectedRoute tenant={tenant}><RunHistory tenant={tenant} /></ProtectedRoute>} />
         <Route path="/booking" element={<ProtectedRoute tenant={tenant}><BookingSetup tenant={tenant} onLogout={handleLogout} /></ProtectedRoute>} />
         <Route path="/integrations/http" element={<ProtectedRoute tenant={tenant}><HttpRequest tenant={tenant} /></ProtectedRoute>} />
+        <Route path="/integrations/email" element={<ProtectedRoute tenant={tenant}><EmailSend tenant={tenant} /></ProtectedRoute>} />
+        <Route path="/integrations/webhook" element={<ProtectedRoute tenant={tenant}><WebhookSend tenant={tenant} /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute tenant={tenant}><AdminOverview tenant={tenant} onLogout={handleLogout} /></AdminRoute>} />
         <Route path="/admin/tenants/:id" element={<AdminRoute tenant={tenant}><AdminTenantDetail /></AdminRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
