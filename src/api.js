@@ -5,6 +5,9 @@ const API_BASE =
 // Public booking routes live at the root, not under /api/v1
 const API_ROOT = API_BASE.replace(/\/api\/v1$/, "");
 
+// Engine routes are at /api/v1/engine (same base as rest of API)
+const ENGINE_BASE = API_BASE;
+
 let accessToken = null;
 let refreshInFlight = null;
 
@@ -158,6 +161,25 @@ export const api = {
   getLogs: function (tenantId, params) {
     const qs = new URLSearchParams(params || {}).toString();
     return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
+  },
+  // Engine trigger — uses API key auth, not session auth
+  triggerEngine: function (templateSlug, apiKey, payload) {
+    return fetch(ENGINE_BASE + "/engine/trigger/" + encodeURIComponent(templateSlug), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiKey,
+      },
+      body: JSON.stringify({ payload: payload }),
+    }).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) {
+          const detail = data && data.detail;
+          throw new Error(typeof detail === "string" ? detail : "Trigger failed");
+        }
+        return data;
+      });
+    });
   },
   // Booking — public (no auth) — use API_ROOT, not API_BASE
   getBookingPage: function (slug) {
