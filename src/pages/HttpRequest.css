@@ -1,0 +1,158 @@
+.method-url-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.method-field {
+  flex: 0 0 110px;
+}
+
+.url-field {
+  flex: 1;
+}
+
+.method-field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-row input {
+  flex: 1;
+}
+
+.remove-btn {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  padding: 0;
+  line-height: 1;
+}
+
+.remove-btn:hover {
+  color: var(--text);
+}
+
+.add-header-btn {
+  font-size: 13px;
+  color: var(--accent);
+  padding: 0;
+  margin-top: 2px;
+  width: fit-content;
+}
+
+.add-header-btn:hover {
+  opacity: 0.8;
+}
+
+.body-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  resize: vertical;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+.body-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.section-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.section-hint code {
+  background: var(--surface-offset, var(--border));
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.field-error {
+  font-size: 13px;
+  color: var(--error, #c0392b);
+  margin-top: 4px;
+}
+
+.test-section {
+  margin-top: 24px;
+}
+
+.test-btn {
+  margin-top: 4px;
+}
+
+.test-result {
+  margin-top: 14px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.test-result .result-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+}
+
+.test-result pre {
+  font-size: 12px;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  padding: 10px 12px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+.test-result.success .result-label {
+  background: color-mix(in srgb, #22c55e 12%, var(--surface));
+  color: #16a34a;
+}
+
+.test-result.warn .result-label {
+  background: color-mix(in srgb, #f59e0b 12%, var(--surface));
+  color: #b45309;
+}
+
+.test-result.error .result-label {
+  background: color-mix(in srgb, #ef4444 12%, var(--surface));
+  color: #b91c1c;
+}

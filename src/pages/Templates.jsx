@@ -69,6 +69,9 @@ export default function Templates({ tenant, onLogout }) {
           <button className="secondary" onClick={() => navigate("/booking")}>
             Booking
           </button>
+          <button className="secondary" onClick={() => navigate("/integrations/http")}>
+            HTTP Request
+          </button>
           <button className="secondary" onClick={() => navigate("/settings")}>
             Settings
           </button>
