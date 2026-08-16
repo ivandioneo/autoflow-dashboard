@@ -1,6 +1,6 @@
 # AutoFlow Project Status
 
-**Last updated:** 2026-08-16 18:36 +04  
+**Last updated:** 2026-08-16 22:21 +04  
 **API repo:** [ivandioneo/autoflow-api](https://github.com/ivandioneo/autoflow-api)  
 **Dashboard repo:** [ivandioneo/autoflow-dashboard](https://github.com/ivandioneo/autoflow-dashboard)  
 **Production API:** https://api.autoflow.ivanit.work  
@@ -158,14 +158,55 @@ Access tokens are **never written to localStorage, sessionStorage, URLs, or logs
 **Production verified 2026-08-16 18:36 +04:**
 - Table loads with real data ✅
 - Success and Error status badges render correctly ✅
-- Row expand shows full JSON result (httpbin.org response + timeout error) ✅
+- Row expand shows full JSON result ✅
 - `← Automations` nav button functional ✅
+
+### 15. HTTP Request Node Dashboard UI (`/integrations/http`)
+**Dashboard:** [`HttpRequest.jsx`](https://github.com/ivandioneo/autoflow-dashboard/blob/main/src/pages/HttpRequest.jsx) · [`HttpRequest.css`](https://github.com/ivandioneo/autoflow-dashboard/blob/main/src/pages/HttpRequest.css)
+
+- Route `/integrations/http` protected and registered in `App.jsx`
+- "HTTP Request" nav button in dashboard header (`Templates.jsx`)
+- Method selector (GET / POST / PUT / PATCH / DELETE)
+- Destination URL field
+- Dynamic header rows (add / remove key-value pairs)
+- Body template textarea with `{{placeholder}}` interpolation hint
+- Enable / Disable toggle persisted on save
+- Save: creates or updates config via `api.createConfig` / `api.updateConfig`
+- Config reloads on hard refresh (persists URL, method, headers, body, enabled state)
+- Inline test panel: fires live engine trigger with `X-API-Key` auth, displays HTTP status code and response body
+
+**Full production smoke test — 2026-08-16 22:21 +04:** ✅
+
+| Check | Result |
+|-------|--------|
+| Login → lands on `/` | ✅ |
+| Hard refresh → session restores | ✅ |
+| LocalStorage — zero auth tokens | ✅ |
+| `autoflow_refresh` cookie — HttpOnly, Secure, SameSite=Strict | ✅ |
+| Automation cards render | ✅ |
+| Header nav: Run History · Booking · HTTP Request · Settings · Sign out | ✅ |
+| Admin button — admin tenant only | ✅ |
+| `/integrations/http` loads correctly | ✅ |
+| Save config → "Saved ✓" feedback | ✅ |
+| Hard refresh → config persists | ✅ |
+| Test panel: `POST https://httpbin.org/post` → HTTP 200 | ✅ |
+| Enabled/Disabled toggle persists after save + hard refresh | ✅ |
+| `/logs` loads, filters work, rows expand/collapse | ✅ |
+| Skeleton loader visible on throttled connection | ✅ |
+| `/booking` renders services and leads | ✅ |
+| Public booking form (`/b/{slug}`) submits successfully | ✅ |
+| Business notification email delivered | ✅ |
+| Customer confirmation email delivered | ✅ |
+| `/settings` — API key masked, show/copy functional | ✅ |
+| Name update saves and reflects immediately | ✅ |
+| Sign out → `/login`; hard refresh stays on `/login` | ✅ |
+| `autoflow_refresh` cookie cleared on logout | ✅ |
 
 ---
 
 ## Pending Verification
 
-All previously pending items are now **verified**. ✅
+None. All shipped features are production-verified. ✅
 
 ---
 
@@ -178,34 +219,10 @@ All previously pending items are now **verified**. ✅
 
 ---
 
-## Next Priority: HTTP Request Node Dashboard UI
-
-The API-side HTTP Request node is **fully implemented and production-verified** (runs visible in `/logs`). The dashboard UI is the only missing piece.
-
-### What's needed
-
-1. **`src/pages/Integrations.jsx`** (new) — Integrations sidebar section listing configured HTTP Request nodes
-2. **`src/components/HttpRequestForm.jsx`** (new) — Create/edit form: name, URL, method, headers (key-value), body, timeout
-3. **`src/components/HttpRequestTestPanel.jsx`** (new) — Inline test panel: trigger a live run, show response JSON
-4. **Sidebar nav entry** — "Integrations" link in the left sidebar
-5. **Route** — `/integrations` added to `App.jsx`
-
-### API endpoints already available
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/configs` | List all tenant configs (includes `http_request` type) |
-| `POST` | `/configs` | Create a new config |
-| `PUT` | `/configs/{id}` | Update a config |
-| `DELETE` | `/configs/{id}` | Delete a config |
-| `POST` | `/engine/run/{automation_id}` | Trigger a live test run |
-
----
-
 ## Backlog
 
-| Priority | Item |
-|----------|------|
-| 🟡 Medium | Audit log UI — surface `auth.*` audit events in admin panel |
-| 🟡 Medium | E2E test suite (Playwright) — login, refresh, logout, email verification, password reset, run history |
-| 🟢 Low | Resend-verification hardening — per-email daily cap |
+| Priority | Item | Notes |
+|----------|------|-------|
+| 🔴 High | **Audit log UI** | `api.getAdminAudit()` already wired in `api.js` → `/admin/audit`. Needs `AdminAudit.jsx` page + route + admin sidebar link. Surface `auth.*` events in a filterable table. |
+| 🟡 Medium | E2E test suite (Playwright) | Login, refresh, logout, email verification, password reset, run history, HTTP Request config + test |
+| 🟢 Low | Resend-verification hardening | Per-email daily cap (currently only per-minute rate limit) |
