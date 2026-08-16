@@ -159,6 +159,12 @@ export const api = {
     const qs = new URLSearchParams(params || {}).toString();
     return request("/tenants/" + tenantId + "/logs" + (qs ? "?" + qs : ""));
   },
+  triggerAutomation: function (templateSlug, payload) {
+    return request("/engine/trigger/" + encodeURIComponent(templateSlug), {
+      method: "POST",
+      body: JSON.stringify({ payload: payload }),
+    });
+  },
   // Booking — public (no auth) — use API_ROOT, not API_BASE
   getBookingPage: function (slug) {
     return fetch(API_ROOT + "/b/" + slug)
