@@ -4,6 +4,7 @@ import { api } from "../api";
 import "./HttpRequest.css";
 
 const METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+const NO_BODY_METHODS = ["GET", "HEAD", "DELETE"];
 
 function emptyRow() {
   return { key: "", value: "" };
@@ -34,6 +35,7 @@ export default function HttpRequest({ tenant }) {
   const [payloadError, setPayloadError] = useState("");
 
   const SLUG = "http_request:default";
+  const hasBody = !NO_BODY_METHODS.includes(method);
 
   useEffect(() => {
     loadConfig();
@@ -72,7 +74,7 @@ export default function HttpRequest({ tenant }) {
       url: url.trim(),
       method,
       headers,
-      ...(bodyTemplate.trim() ? { body_template: bodyTemplate.trim() } : {}),
+      ...(hasBody && bodyTemplate.trim() ? { body_template: bodyTemplate.trim() } : {}),
     };
   }
 
@@ -238,16 +240,24 @@ export default function HttpRequest({ tenant }) {
       {/* Body template */}
       <div className="config-section">
         <h2>Body template</h2>
-        <p className="section-hint">
-          Optional JSON body. Use <code>{"{{key}}"}</code> placeholders — values are filled from the trigger payload.
-        </p>
+        {hasBody ? (
+          <p className="section-hint">
+            Optional JSON body. Use <code>{"{{key}}"}</code> placeholders — values are filled from the trigger payload.
+          </p>
+        ) : (
+          <p className="section-hint">
+            Body is not sent for <strong>{method}</strong> requests.
+          </p>
+        )}
         <textarea
-          className="body-textarea"
-          value={bodyTemplate}
-          onChange={(e) => setBodyTemplate(e.target.value)}
-          placeholder={'{ "name": "{{customer_name}}", "amount": "{{amount}}" }'}
+          className={`body-textarea${!hasBody ? " disabled" : ""}`}
+          value={hasBody ? bodyTemplate : ""}
+          onChange={(e) => hasBody && setBodyTemplate(e.target.value)}
+          placeholder={hasBody ? '{ "name": "{{customer_name}}", "amount": "{{amount}}" }' : `Body not applicable for ${method}`}
           rows={6}
           spellCheck={false}
+          disabled={!hasBody}
+          aria-disabled={!hasBody}
         />
       </div>
 
@@ -258,14 +268,14 @@ export default function HttpRequest({ tenant }) {
         onClick={handleSave}
         disabled={saving}
       >
-        {saving ? "Saving..." : saved ? "Saved ✓" : "Save changes"}
+        {saving ? "Saving..." : saved ? "Saved \u2713" : "Save changes"}
       </button>
 
       {/* Test panel */}
       <div className="config-section test-section">
         <h2>Test request</h2>
         <p className="section-hint">
-          Send a live request using the config above. Make sure you've saved first.
+          Send a live request using the config above. Make sure you’ve saved first.
         </p>
         <div className="field">
           <label>Test payload (JSON)</label>
