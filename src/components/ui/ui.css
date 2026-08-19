@@ -1,0 +1,133 @@
+/* UI primitives — LoadingSpinner, Skeleton, EmptyState, ErrorState
+   All tokens reference existing variables from index.css plus the
+   Sprint 1 shell tokens appended during FE-003. */
+
+/* ── LoadingSpinner ── */
+.af-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.af-spinner-ring {
+  display: block;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: af-spin 0.7s linear infinite;
+}
+
+.af-spinner--sm .af-spinner-ring { width: 16px; height: 16px; }
+.af-spinner--md .af-spinner-ring { width: 24px; height: 24px; }
+.af-spinner--lg .af-spinner-ring { width: 36px; height: 36px; border-width: 3px; }
+
+@keyframes af-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .af-spinner-ring {
+    animation: none;
+    border-top-color: var(--border);
+    opacity: 0.5;
+  }
+}
+
+/* ── Skeleton ── */
+.af-skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--surface-2) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius);
+  animation: af-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes af-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .af-skeleton {
+    animation: none;
+    background: var(--border);
+  }
+}
+
+/* ── EmptyState ── */
+.af-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-16) var(--space-8);
+  color: var(--text-muted);
+}
+
+.af-empty-state-icon {
+  display: flex;
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.af-empty-state-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+  max-width: 36ch;
+}
+
+.af-empty-state-message {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  max-width: 44ch;
+  margin-bottom: var(--space-6);
+  line-height: 1.6;
+}
+
+.af-empty-state-action {
+  /* inherits button.primary from index.css */
+}
+
+/* ── ErrorState ── */
+.af-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
+  color: var(--text-muted);
+}
+
+.af-error-state-icon {
+  display: flex;
+  margin-bottom: var(--space-4);
+  color: var(--danger);
+  opacity: 0.85;
+}
+
+.af-error-state-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+
+.af-error-state-message {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  max-width: 44ch;
+  margin-bottom: var(--space-6);
+  line-height: 1.6;
+}
+
+.af-error-state-retry {
+  /* inherits button.secondary from index.css */
+}

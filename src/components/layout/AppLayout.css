@@ -1,0 +1,59 @@
+/* AppLayout — application shell layout
+   Responsive: sidebar fixed on desktop, collapsed strip on tablet,
+   off-canvas overlay drawer on mobile.
+   Does NOT affect legacy pages — this shell is opt-in only. */
+
+.af-shell {
+  display: flex;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+/* Shell body — occupies space to the right of the sidebar */
+.af-shell-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0; /* prevent flex overflow */
+  margin-left: var(--sidebar-width);
+  transition: margin-left var(--transition-base);
+}
+
+/* Main content area */
+.af-main {
+  flex: 1;
+  padding: var(--space-6) var(--space-8);
+  max-width: var(--content-max-width);
+  width: 100%;
+}
+
+/* Mobile sidebar backdrop overlay */
+.af-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: 39;
+  display: none;
+}
+
+/* ── Tablet (768px – 1023px): collapsed sidebar ── */
+@media (max-width: 1023px) {
+  .af-shell-body {
+    margin-left: var(--sidebar-width-collapsed);
+  }
+}
+
+/* ── Mobile (< 768px): no sidebar margin; drawer overlays ── */
+@media (max-width: 767px) {
+  .af-shell-body {
+    margin-left: 0;
+  }
+
+  .af-sidebar-backdrop {
+    display: block;
+  }
+
+  .af-main {
+    padding: var(--space-4);
+  }
+}

@@ -1,0 +1,200 @@
+/* Sidebar — fixed left navigation
+   Desktop (≥1024px): full-width (240px), always visible
+   Tablet (768–1023px): collapsed icon strip (64px)
+   Mobile (<768px):  off-canvas overlay drawer */
+
+.af-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--navy);
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  overflow-x: hidden;
+  transition: width var(--transition-base), transform var(--transition-base);
+}
+
+/* ── Brand ── */
+.af-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+  min-height: var(--topbar-height);
+}
+
+.af-sidebar-brand-mark {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.af-sidebar-brand-name {
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ── Navigation ── */
+.af-sidebar-nav {
+  flex: 1;
+  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+}
+
+.af-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  min-height: 44px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.af-nav-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #e2e8f0;
+}
+
+.af-nav-item--active {
+  background: rgba(13, 148, 136, 0.18);
+  color: #5eead4;
+}
+
+.af-nav-item--active:hover {
+  background: rgba(13, 148, 136, 0.24);
+  color: #5eead4;
+}
+
+.af-nav-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.af-nav-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Footer / Account ── */
+.af-sidebar-footer {
+  padding: var(--space-4) var(--space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+}
+
+.af-sidebar-account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.af-sidebar-account-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: rgba(13, 148, 136, 0.3);
+  color: #5eead4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.af-sidebar-account-name {
+  font-size: var(--text-sm);
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Tablet: collapsed icon strip ── */
+@media (max-width: 1023px) {
+  .af-sidebar {
+    width: var(--sidebar-width-collapsed);
+  }
+
+  .af-sidebar-brand-name,
+  .af-nav-label,
+  .af-sidebar-account-name {
+    display: none;
+  }
+
+  .af-sidebar-brand {
+    justify-content: center;
+    padding: var(--space-4);
+  }
+
+  .af-nav-item {
+    justify-content: center;
+    padding: var(--space-2);
+  }
+
+  .af-nav-icon {
+    width: auto;
+  }
+
+  .af-sidebar-account {
+    justify-content: center;
+  }
+}
+
+/* ── Mobile: off-canvas overlay ── */
+@media (max-width: 767px) {
+  .af-sidebar {
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+  }
+
+  .af-sidebar--open {
+    transform: translateX(0);
+  }
+
+  /* Restore labels when open on mobile */
+  .af-sidebar--open .af-sidebar-brand-name,
+  .af-sidebar--open .af-nav-label,
+  .af-sidebar--open .af-sidebar-account-name {
+    display: block;
+  }
+
+  .af-sidebar--open .af-sidebar-brand {
+    justify-content: flex-start;
+    padding: var(--space-5);
+  }
+
+  .af-sidebar--open .af-nav-item {
+    justify-content: flex-start;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .af-sidebar--open .af-sidebar-account {
+    justify-content: flex-start;
+  }
+}

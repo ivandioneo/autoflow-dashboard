@@ -1,0 +1,108 @@
+/* TopBar — sticky application header */
+
+.af-topbar {
+  height: var(--topbar-height);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex-shrink: 0;
+}
+
+.af-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.af-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+/* Hamburger — only visible on mobile */
+.af-topbar-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0;
+  border: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.af-topbar-menu-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.af-topbar-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.af-topbar-user {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.af-topbar-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  min-height: 44px;
+}
+
+.af-topbar-logout-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .af-topbar {
+    padding: 0 var(--space-4);
+  }
+
+  .af-topbar-menu-btn {
+    display: flex;
+  }
+
+  .af-topbar-user {
+    display: none;
+  }
+
+  .af-topbar-logout-label {
+    display: none;
+  }
+}
